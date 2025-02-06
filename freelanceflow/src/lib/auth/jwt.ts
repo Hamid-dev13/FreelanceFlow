@@ -1,22 +1,27 @@
-import { JwtPayload } from 'jsonwebtoken';
-import jwt from 'jsonwebtoken';
+import * as jose from 'jose';
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
-const JWT_EXPIRE = '24h';
+const JWT_SECRET = new TextEncoder().encode(
+    process.env.JWT_SECRET || 'your-secret-key'
+);
 
-type TokenPayload = {
-    userId: string;
-    email: string;
-};
-
-export const signJWT = (payload: TokenPayload): string => {
-    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRE });
-};
-
-export const verifyJWT = (token: string): TokenPayload | null => {
+export async function verifyJWT(token: string) {
     try {
-        return jwt.verify(token, JWT_SECRET) as TokenPayload;
+        const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+        return {
+            userId: payload.userId as string,
+            email: payload.email as string
+        };
     } catch (error) {
+        console.error('JWT verification failed:', error);
         return null;
     }
-};
+}
+
+export async function signJWT(payload: { userId: string; email: string }) {
+    const jwt = await new jose.SignJWT(payload)
+        .setProtectedHeader({ alg: 'HS256' })
+        .setExpirationTime('24h')
+        .sign(JWT_SECRET);
+
+    return jwt;
+}

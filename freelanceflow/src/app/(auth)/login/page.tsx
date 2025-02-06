@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { error } from "console";
+
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");

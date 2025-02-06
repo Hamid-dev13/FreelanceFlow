@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { error } from "console";
 
 export default function LoginPage() {
     const [email, setEmail] = useState("");
@@ -11,6 +12,31 @@ export default function LoginPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         // TODO: Implémenter la logique de login
+        try {
+            // Envoi de la requête POST vers l'API backend
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ email, password }),
+            });
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Erreur lors de la connexion");
+            }
+            localStorage.setItem("authToken", data.token);
+
+            // Redirection vers la page sécurisée
+            window.location.href = "/dashboard";
+        } catch (err) {
+            if (err instanceof Error) {
+                setError(err.message || "Erreur lors de la connexion");
+            } else {
+                setError("Erreur inconnue");
+            }
+        }
     };
 
     return (
@@ -59,6 +85,8 @@ export default function LoginPage() {
                                 />
                             </div>
                         </div>
+
+
 
                         <div>
                             <button
@@ -119,4 +147,8 @@ export default function LoginPage() {
             </div>
         </div>
     );
+}
+
+function setError(arg0: any) {
+    throw new Error("Function not implemented.");
 }

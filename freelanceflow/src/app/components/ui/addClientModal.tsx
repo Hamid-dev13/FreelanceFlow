@@ -1,8 +1,7 @@
-// components/AddClientModal.tsx
 "use client";
 
-import { X } from 'lucide-react';
-import { useState } from 'react';
+import { useState } from "react";
+import { X } from "lucide-react";
 
 type Props = {
     isOpen: boolean;
@@ -13,7 +12,7 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
     const [formData, setFormData] = useState({
         name: "",
         email: "",
-        phone: ""
+        phone: "",
     });
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -25,75 +24,78 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`
+                    Authorization: `Bearer ${token}`,
                 },
-                body: JSON.stringify(formData)
+                body: JSON.stringify(formData),
             });
 
             if (res.ok) {
                 onClose();
+                // Rafraîchir la liste
             }
         } catch (error) {
             console.error(error);
         }
     };
 
+    if (!isOpen) return null;
+
     return (
-        <div className={`fixed inset-0 z-50 ${isOpen ? "" : "hidden"}`}>
-            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
-                <div className="bg-white rounded-lg shadow-xl">
-                    <div className="flex items-center justify-between p-6 border-b">
-                        <h3 className="text-lg font-semibold">Nouveau Client</h3>
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+            <div className="flex min-h-screen items-center justify-center p-4">
+                <div className="fixed inset-0 bg-black opacity-30" onClick={onClose} />
+                <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="text-xl font-semibold">Nouveau Client</h2>
                         <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
-                            <X className="h-5 w-5" />
+                            <X className="h-6 w-6" />
                         </button>
                     </div>
 
-                    <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                    <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                            <label className="block text-sm font-medium text-gray-700">Nom</label>
                             <input
                                 type="text"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <label className="block text-sm font-medium text-gray-700">Email</label>
                             <input
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                            <label className="block text-sm font-medium text-gray-700">Téléphone</label>
                             <input
                                 type="tel"
                                 value={formData.phone}
                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
                             />
                         </div>
 
-                        <div className="flex justify-end gap-3">
+                        <div className="mt-6 flex justify-end gap-3">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
+                                className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
                             >
                                 Annuler
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-500 rounded-lg"
+                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
                             >
                                 Ajouter
                             </button>

@@ -1,12 +1,41 @@
 // src/app/(dashboard)/clients/page.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { UserPlus, Search } from 'lucide-react';
-import AddClientModal from '@/app/components/addClientModal';
+import AddClientModal from '@/app/components/ui/addClientModal';
+
+type Client = {
+    id: string;
+    name: string;
+    email: string;
+    phone?: string;
+    createdAt: string;
+    updatedAt: string;
+};
 
 export default function ClientsPage() {
+    const [clients, setClients] = useState<Client[]>([]);
     const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
+
+    const fetchClients = async () => {
+        const token = localStorage.getItem("token");
+        try {
+            const res = await fetch("/api/clients", {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setClients(data);
+            }
+        } catch (error) {
+            console.error("Erreur lors du chargement des clients:", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchClients();
+    }, []);
 
     return (
         <div className="bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
@@ -46,7 +75,19 @@ export default function ClientsPage() {
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-gray-100">
-                            {/* Les clients seront affichés ici */}
+                            {clients.map((client) => (
+                                <tr key={client.id}>
+                                    <td className="px-4 py-3">{client.name}</td>
+                                    <td className="px-4 py-3">{client.email}</td>
+                                    <td className="px-4 py-3">{client.phone || '-'}</td>
+                                    <td className="px-4 py-3">-</td>
+                                    <td className="px-4 py-3">
+                                        <button className="text-blue-600 hover:text-blue-800">
+                                            Éditer
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
                         </tbody>
                     </table>
                 </div>
@@ -54,7 +95,10 @@ export default function ClientsPage() {
 
             <AddClientModal
                 isOpen={isAddClientModalOpen}
-                onClose={() => setIsAddClientModalOpen(false)}
+                onClose={() => {
+                    setIsAddClientModalOpen(false);
+                    fetchClients(); // Rafraîchir la liste après ajout
+                }}
             />
         </div>
     );

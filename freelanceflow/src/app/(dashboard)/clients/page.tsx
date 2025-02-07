@@ -17,7 +17,18 @@ type Client = {
 export default function ClientsPage() {
     const [clients, setClients] = useState<Client[]>([]);
     const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
+    // Dans clients/page.tsx
+    const handleDeleteClient = async (clientId: string) => {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`/api/clients/${clientId}`, {
+            method: "DELETE",
+            headers: { Authorization: `Bearer ${token}` }
+        });
 
+        if (res.ok) {
+            fetchClients();
+        }
+    };
     const fetchClients = async () => {
         const token = localStorage.getItem("token");
         try {

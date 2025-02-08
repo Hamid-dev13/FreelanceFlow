@@ -1,11 +1,19 @@
+"use client"
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { Zap, Shield, CheckCircle } from 'lucide-react';
 import { Button } from './Stylecomponents/Button';
 import { FeatureCard } from './Stylecomponents/FeatureCard';
 import { GradientText } from './Stylecomponents/GradientText';
 import './styles/theme.css';
 
-export default function App() {
+export default function LandingPage() {
+  const router = useRouter();
+
+  const handleStartClick = () => {
+    router.push('/login');
+  };
+
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
@@ -19,7 +27,13 @@ export default function App() {
         <div className="flex items-center gap-8">
           <a href="#" className="text-gray-400 hover:text-white transition-colors">Fonctionnalités</a>
           <a href="#" className="text-gray-400 hover:text-white transition-colors">À propos</a>
-          <Button variant="primary" size="sm">Commencer</Button>
+          <Button
+            variant="primary"
+            size="sm"
+            onClick={handleStartClick}
+          >
+            Commencer
+          </Button>
         </div>
       </nav>
 
@@ -36,7 +50,10 @@ export default function App() {
               Concentrez-vous sur ce qui compte vraiment : votre travail.
             </p>
             <div className="flex gap-4">
-              <Button variant="primary">
+              <Button
+                variant="primary"
+                onClick={handleStartClick}
+              >
                 Commencer Gratuitement
                 <span className="text-xl group-hover:translate-x-1 transition-transform">→</span>
               </Button>
@@ -96,7 +113,12 @@ export default function App() {
           <p className="text-xl text-gray-400 mb-8">
             Rejoignez la communauté des freelances qui gèrent leur activité efficacement
           </p>
-          <Button variant="primary" size="lg" className="mx-auto">
+          <Button
+            variant="primary"
+            size="lg"
+            className="mx-auto"
+            onClick={handleStartClick}
+          >
             Commencer Maintenant
             <span className="group-hover:translate-x-1 transition-transform">→</span>
           </Button>

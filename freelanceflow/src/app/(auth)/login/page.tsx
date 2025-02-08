@@ -135,7 +135,7 @@ export default function LoginPage() {
 
                         <div className="mt-6 text-center">
                             <Link
-                                href="/signup"
+                                href="/SignUp"
                                 className="inline-flex items-center gap-2 font-medium text-primary hover:text-primary-light transition-colors duration-200 mr-5"
                             >
                                 <UserPlus className="h-4 w-4" />

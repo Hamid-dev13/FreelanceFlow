@@ -1,17 +1,46 @@
-// src/app/api/auth/signup/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signJWT } from "@/lib/auth/jwt";
 
+// Email validation regex
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// Password strength regex
+const PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+
 export async function POST(req: Request) {
     try {
         const { email, password, name } = await req.json();
 
-        // Validation basique
-        if (!email || !password || !name) {
+        // Comprehensive validation
+        const validationErrors: { [key: string]: string } = {};
+
+        // Name validation
+        if (!name || name.trim().length < 2) {
+            validationErrors.name = "Nom invalide. Minimum 2 caractères.";
+        }
+
+        // Email validation
+        if (!email) {
+            validationErrors.email = "Email requis";
+        } else if (!EMAIL_REGEX.test(email)) {
+            validationErrors.email = "Format email invalide";
+        }
+
+        // Password validation
+        if (!password) {
+            validationErrors.password = "Mot de passe requis";
+        } else if (password.length < 8) {
+            validationErrors.password = "Mot de passe trop court. Minimum 8 caractères.";
+        } else if (!PASSWORD_REGEX.test(password)) {
+            validationErrors.password = "Mot de passe faible. Inclure majuscule, minuscule, chiffre et caractère spécial.";
+        }
+
+        // Return validation errors if any
+        if (Object.keys(validationErrors).length > 0) {
             return NextResponse.json(
-                { error: "Missing required fields" },
+                { errors: validationErrors },
                 { status: 400 }
             );
         }
@@ -23,7 +52,7 @@ export async function POST(req: Request) {
 
         if (existingUser) {
             return NextResponse.json(
-                { error: "User already exists" },
+                { error: "Un compte avec cet email existe déjà" },
                 { status: 400 }
             );
         }
@@ -36,18 +65,30 @@ export async function POST(req: Request) {
             data: {
                 email,
                 password: hashedPassword,
-                name,
+                name: name.trim(),
             },
         });
 
         // Générer le token
-        const token = signJWT({ userId: user.id, email: user.email });
+        const token = signJWT({
+            userId: user.id,
+            email: user.email,
+            name: user.name
+        });
 
-        return NextResponse.json({ token }, { status: 201 });
+        return NextResponse.json({
+            token,
+            user: {
+                id: user.id,
+                email: user.email,
+                name: user.name
+            }
+        }, { status: 201 });
+
     } catch (error) {
         console.error("Signup error:", error);
         return NextResponse.json(
-            { error: "Error creating user" },
+            { error: "Erreur lors de la création du compte" },
             { status: 500 }
         );
     }

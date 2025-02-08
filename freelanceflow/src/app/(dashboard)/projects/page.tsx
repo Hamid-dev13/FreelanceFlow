@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { PlusCircle, Search } from 'lucide-react';
 import AddProjectModal from "@/app/components/ui/AddProjectModal";
+import EditProjectModal from "@/app/components/ui/EditProjectModal";
 
 type Project = {
     id: string;
@@ -20,7 +21,8 @@ type Project = {
 export default function ProjectsPage() {
     const [projects, setProjects] = useState<Project[]>([]);
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const fetchProjects = async () => {
         const token = localStorage.getItem("token");
         const res = await fetch("/api/projects", {
@@ -78,7 +80,12 @@ export default function ProjectsPage() {
                                 <td className="px-4 py-3">{project.status}</td>
                                 <td className="px-4 py-3">{new Date(project.startDate).toLocaleDateString()}</td>
                                 <td className="px-4 py-3 flex gap-2">
-                                    <button className="text-primary hover:text-primary-light transition-colors">
+                                    <button
+                                        onClick={() => {
+                                            setSelectedProject(project);
+                                            setIsEditModalOpen(true);
+                                        }}
+                                        className="text-blue-600 hover:text-blue-800">
                                         Éditer
                                     </button>
                                     <button className="text-secondary hover:text-secondary-light transition-colors">
@@ -94,6 +101,12 @@ export default function ProjectsPage() {
                 isOpen={isAddModalOpen}
                 onClose={() => setIsAddModalOpen(false)}
                 onSuccess={fetchProjects}
+            />
+            <EditProjectModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onSuccess={fetchProjects}
+                project={selectedProject}
             />
         </div>
     );

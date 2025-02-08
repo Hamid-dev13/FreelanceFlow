@@ -7,7 +7,9 @@ import { LogIn, Loader2, ArrowLeft, Zap } from 'lucide-react';
 import Image from 'next/image';
 import '../styles/theme.css';
 import { Button } from '../Stylecomponents/Button';
-import { GradientText } from '../Stylecomponents/GradientText';
+import { GradientText } from '@/app/Stylecomponents/GradientText';
+
+
 
 export default function SignUpPage() {
     const router = useRouter();

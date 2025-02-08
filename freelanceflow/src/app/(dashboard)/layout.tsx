@@ -30,7 +30,7 @@ export default function DashboardLayout({
     }, []);
 
     const menuItems = [
-        { name: "Dashboard", href: "/", icon: LayoutDashboard },
+        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { name: "Clients", href: "/clients", icon: Users },
         { name: "Projets", href: "/projects", icon: FolderKanban },
     ];

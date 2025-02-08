@@ -58,7 +58,7 @@ export default function DashboardLayout({
                 </div>
             </nav>
 
-            <div className="flex pt-16">
+            <div className="flex mt-2">
                 {/* Sidebar */}
                 <aside className={`fixed inset-y-0 left-0 transform ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} w-64 bg-white border-r border-gray-200 transition-all duration-300 ease-in-out pt-16`}>
                     <nav className="mt-5 px-3 space-y-1">

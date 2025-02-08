@@ -38,7 +38,7 @@ model Project {
   startDate   DateTime  @default(now())
   endDate     DateTime?
   status      String    @default("EN_COURS")
-  client      Client    @relation(fields: [clientId], references: [id])
+  client      Client    @relation(fields: [clientId], references: [id], onDelete: Cascade)
   clientId    String
   user        User      @relation(fields: [userId], references: [id])
   userId      String

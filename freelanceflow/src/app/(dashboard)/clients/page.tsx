@@ -4,6 +4,7 @@
 import { useState, useEffect } from "react";
 import { UserPlus, Search } from 'lucide-react';
 import AddClientModal from '@/app/components/ui/addClientModal';
+import EditClientModal from '@/app/components/ui/EditClientModal';
 
 type Client = {
     id: string;
@@ -17,6 +18,8 @@ type Client = {
 export default function ClientsPage() {
     const [clients, setClients] = useState<Client[]>([]);
     const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
+    const [selectedClient, setSelectedClient] = useState<Client | null>(null);
+    const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     // Dans clients/page.tsx
     const handleDeleteClient = async (clientId: string) => {
         const token = localStorage.getItem("token");
@@ -85,16 +88,32 @@ export default function ClientsPage() {
                                 <th className="px-4 py-3 text-left font-medium">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y text-black">
                             {clients.map((client) => (
                                 <tr key={client.id}>
                                     <td className="px-4 py-3">{client.name}</td>
                                     <td className="px-4 py-3">{client.email}</td>
                                     <td className="px-4 py-3">{client.phone || '-'}</td>
                                     <td className="px-4 py-3">-</td>
-                                    <td className="px-4 py-3">
-                                        <button className="text-blue-600 hover:text-blue-800">
+                                    <td className="px-4 py-3 flex gap-2">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedClient(client);
+                                                setIsEditModalOpen(true);
+                                            }}
+                                            className="text-blue-600 hover:text-blue-800"
+                                        >
                                             Éditer
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (confirm('Supprimer ce client ?')) {
+                                                    handleDeleteClient(client.id);
+                                                }
+                                            }}
+                                            className="text-red-600 hover:text-red-800"
+                                        >
+                                            Supprimer
                                         </button>
                                     </td>
                                 </tr>
@@ -110,6 +129,12 @@ export default function ClientsPage() {
                     setIsAddClientModalOpen(false);
                     fetchClients(); // Rafraîchir la liste après ajout
                 }}
+            />
+            <EditClientModal
+                isOpen={isEditModalOpen}
+                onClose={() => setIsEditModalOpen(false)}
+                onSuccess={fetchClients}
+                client={selectedClient}
             />
         </div>
     );

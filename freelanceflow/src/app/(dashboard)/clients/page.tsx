@@ -1,4 +1,3 @@
-// src/app/(dashboard)/clients/page.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -20,7 +19,7 @@ export default function ClientsPage() {
     const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-    // Dans clients/page.tsx
+
     const handleDeleteClient = async (clientId: string) => {
         const token = localStorage.getItem("token");
         const res = await fetch(`/api/clients/${clientId}`, {
@@ -32,6 +31,7 @@ export default function ClientsPage() {
             fetchClients();
         }
     };
+
     const fetchClients = async () => {
         const token = localStorage.getItem("token");
         try {
@@ -52,13 +52,13 @@ export default function ClientsPage() {
     }, []);
 
     return (
-        <div className="bg-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
-            <div className="px-6 py-4 border-b border-gray-200">
+        <div className="bg-gray-900 rounded-xl shadow-lg border border-gray-800">
+            <div className="px-6 py-4 border-b border-gray-800">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <h2 className="text-xl font-semibold text-gray-800">Gestion des Clients</h2>
+                    <h2 className="text-xl font-semibold text-white">Gestion des Clients</h2>
                     <button
                         onClick={() => setIsAddClientModalOpen(true)}
-                        className="flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/40 transition-all duration-200 hover:scale-105"
+                        className="flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-primary to-secondary text-white rounded-lg shadow-[0_0_15px_rgba(var(--color-primary),0.3)]"
                     >
                         <UserPlus className="h-4 w-4" />
                         <span>Nouveau Client</span>
@@ -69,7 +69,7 @@ export default function ClientsPage() {
                         <input
                             type="text"
                             placeholder="Rechercher un client..."
-                            className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-50 border border-gray-200 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40 transition-all duration-200 hover:shadow-md"
+                            className="w-full pl-10 pr-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
                         />
                         <Search className="h-4 w-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
                     </div>
@@ -79,7 +79,7 @@ export default function ClientsPage() {
             <div className="p-6">
                 <div className="overflow-x-auto">
                     <table className="w-full">
-                        <thead className="bg-gray-50 text-gray-600 text-sm">
+                        <thead className="bg-gray-800/50 text-gray-300 text-sm">
                             <tr>
                                 <th className="px-4 py-3 text-left font-medium">Nom</th>
                                 <th className="px-4 py-3 text-left font-medium">Email</th>
@@ -88,9 +88,9 @@ export default function ClientsPage() {
                                 <th className="px-4 py-3 text-left font-medium">Actions</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y text-black">
+                        <tbody className="divide-y divide-gray-800 text-gray-300">
                             {clients.map((client) => (
-                                <tr key={client.id}>
+                                <tr key={client.id} className="border-gray-800">
                                     <td className="px-4 py-3">{client.name}</td>
                                     <td className="px-4 py-3">{client.email}</td>
                                     <td className="px-4 py-3">{client.phone || '-'}</td>
@@ -101,7 +101,7 @@ export default function ClientsPage() {
                                                 setSelectedClient(client);
                                                 setIsEditModalOpen(true);
                                             }}
-                                            className="text-blue-600 hover:text-blue-800"
+                                            className="text-primary hover:text-primary-light"
                                         >
                                             Éditer
                                         </button>
@@ -111,7 +111,7 @@ export default function ClientsPage() {
                                                     handleDeleteClient(client.id);
                                                 }
                                             }}
-                                            className="text-red-600 hover:text-red-800"
+                                            className="text-secondary hover:text-secondary-light"
                                         >
                                             Supprimer
                                         </button>
@@ -127,7 +127,7 @@ export default function ClientsPage() {
                 isOpen={isAddClientModalOpen}
                 onClose={() => {
                     setIsAddClientModalOpen(false);
-                    fetchClients(); // Rafraîchir la liste après ajout
+                    fetchClients();
                 }}
             />
             <EditClientModal

@@ -1,4 +1,3 @@
-// components/ui/AddProjectModal.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -66,34 +65,34 @@ export default function AddProjectModal({ isOpen, onClose, onSuccess }: Props) {
 
     return (
         <div className={`fixed inset-0 z-50 ${isOpen ? "" : "hidden"}`}>
-            <div className="absolute inset-0 bg-black/50" onClick={onClose} />
+            <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md">
-                <div className="bg-white rounded-lg shadow-xl">
-                    <div className="flex items-center justify-between p-6 border-b">
-                        <h3 className="text-lg font-semibold text-black">Nouveau Projet</h3>
-                        <button onClick={onClose}>
+                <div className="bg-gray-900 rounded-xl shadow-xl border border-gray-800">
+                    <div className="flex items-center justify-between p-6 border-b border-gray-800">
+                        <h3 className="text-lg font-semibold text-white">Nouveau Projet</h3>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-300 transition-colors">
                             <X className="h-5 w-5" />
                         </button>
                     </div>
 
                     <form onSubmit={handleSubmit} className="p-6 space-y-4">
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-black">Titre</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-300">Titre</label>
                             <input
                                 type="text"
                                 value={formData.title}
                                 onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                                className="w-full p-2 border rounded text-black"
+                                className="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-black">Client</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-300">Client</label>
                             <select
                                 value={formData.clientId}
                                 onChange={(e) => setFormData({ ...formData, clientId: e.target.value })}
-                                className="w-full p-2 border rounded text-black"
+                                className="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
                                 required
                             >
                                 <option value="">Sélectionner un client</option>
@@ -106,23 +105,23 @@ export default function AddProjectModal({ isOpen, onClose, onSuccess }: Props) {
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-black">Date de début</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-300">Date de début</label>
                             <input
                                 type="date"
                                 value={formData.startDate}
                                 onChange={(e) => setFormData({ ...formData, startDate: e.target.value })}
-                                className="w-full p-2 border rounded text-black"
+                                className="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium mb-1 text-black">Date de fin (optionnel)</label>
+                            <label className="block text-sm font-medium mb-1 text-gray-300">Date de fin (optionnel)</label>
                             <input
                                 type="date"
                                 value={formData.endDate}
                                 onChange={(e) => setFormData({ ...formData, endDate: e.target.value })}
-                                className="w-full p-2 border rounded text-black"
+                                className="w-full p-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
                             />
                         </div>
 
@@ -130,13 +129,13 @@ export default function AddProjectModal({ isOpen, onClose, onSuccess }: Props) {
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 rounded-lg"
+                                className="px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
                             >
                                 Annuler
                             </button>
                             <button
                                 type="submit"
-                                className="px-4 py-2 text-sm text-white bg-blue-600 hover:bg-blue-500 rounded-lg"
+                                className="px-4 py-2 text-sm text-white bg-gradient-to-r from-primary to-secondary rounded-lg shadow-[0_0_15px_rgba(var(--color-primary),0.3)] hover:shadow-[0_0_25px_rgba(var(--color-primary),0.5)] transition-all"
                             >
                                 Créer
                             </button>

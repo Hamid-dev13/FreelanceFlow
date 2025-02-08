@@ -1,4 +1,3 @@
-// components/ui/EditClientModal.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -63,45 +62,45 @@ export default function EditClientModal({ isOpen, onClose, onSuccess, client }: 
     return (
         <div className="fixed inset-0 z-50 overflow-y-auto">
             <div className="flex min-h-screen items-center justify-center p-4">
-                <div className="fixed inset-0 bg-black opacity-30" onClick={onClose} />
-                <div className="relative w-full max-w-md rounded-lg bg-white p-6 shadow-xl">
+                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+                <div className="relative w-full max-w-md rounded-xl bg-gray-900 p-6 shadow-xl border border-gray-800">
                     <div className="mb-4 flex items-center justify-between">
-                        <h2 className="text-xl font-semibold">Modifier Client</h2>
-                        <button onClick={onClose} className="text-gray-400 hover:text-gray-500">
+                        <h2 className="text-xl font-semibold text-white">Modifier Client</h2>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-300 transition-colors">
                             <X className="h-6 w-6" />
                         </button>
                     </div>
 
                     <form onSubmit={handleSubmit} className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Nom</label>
+                            <label className="block text-sm font-medium text-gray-300">Nom</label>
                             <input
                                 type="text"
                                 value={formData.name}
                                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                                className="mt-1 block w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Email</label>
+                            <label className="block text-sm font-medium text-gray-300">Email</label>
                             <input
                                 type="email"
                                 value={formData.email}
                                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                                className="mt-1 block w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700">Téléphone</label>
+                            <label className="block text-sm font-medium text-gray-300">Téléphone</label>
                             <input
                                 type="tel"
                                 value={formData.phone}
                                 onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                className="mt-1 block w-full rounded-md border border-gray-300 px-3 py-2 text-gray-900 focus:border-blue-500 focus:ring-blue-500"
+                                className="mt-1 block w-full rounded-lg bg-gray-800 border border-gray-700 px-3 py-2 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary"
                             />
                         </div>
 
@@ -109,13 +108,13 @@ export default function EditClientModal({ isOpen, onClose, onSuccess, client }: 
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="rounded-md px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                                className="px-4 py-2 text-sm text-gray-300 hover:bg-gray-800 rounded-lg transition-colors"
                             >
                                 Annuler
                             </button>
                             <button
                                 type="submit"
-                                className="rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-500"
+                                className="px-4 py-2 text-sm text-white bg-gradient-to-r from-primary to-secondary rounded-lg shadow-[0_0_15px_rgba(var(--color-primary),0.3)] hover:shadow-[0_0_25px_rgba(var(--color-primary),0.5)] transition-all"
                             >
                                 Sauvegarder
                             </button>

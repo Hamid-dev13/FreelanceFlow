@@ -19,8 +19,7 @@ export async function POST(req: Request) {
         // Générer le JWT avec jose (async)
         const token = await signJWT({
             userId: user.id,
-            email: user.email,
-            name: ""
+            email: user.email
         });
 
         return NextResponse.json({ token });

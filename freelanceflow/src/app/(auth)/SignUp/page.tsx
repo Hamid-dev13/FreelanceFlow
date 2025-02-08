@@ -2,7 +2,7 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/app/Stylecomponents/Button';
-
+import '../styles/theme.css';
 export default function SignupPage() {
     const [formData, setFormData] = useState({
         name: '',

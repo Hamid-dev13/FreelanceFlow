@@ -9,15 +9,15 @@ export async function verifyJWT(token: string) {
         const { payload } = await jose.jwtVerify(token, JWT_SECRET);
         return {
             userId: payload.userId as string,
-            email: payload.email as string,
-            name: payload.name as string
+            email: payload.email as string
         };
     } catch (error) {
         console.error('JWT verification failed:', error);
         return null;
     }
 }
-export async function signJWT(payload: { userId: string; email: string; name: string }) {
+
+export async function signJWT(payload: { userId: string; email: string }) {
     const jwt = await new jose.SignJWT(payload)
         .setProtectedHeader({ alg: 'HS256' })
         .setExpirationTime('24h')

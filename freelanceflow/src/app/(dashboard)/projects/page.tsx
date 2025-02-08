@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { PlusCircle, Search } from 'lucide-react';
 import AddProjectModal from "@/app/components/ui/AddProjectModal";
 import EditProjectModal from "@/app/components/ui/EditProjectModal";
+import DeleteProjectModal from "@/app/components/ui/DeleteProjectModal";
 
 type Project = {
     id: string;
@@ -12,6 +13,7 @@ type Project = {
     status: string;
     startDate: string;
     endDate?: string;
+    clientId: string;
     client: {
         id: string;
         name: string;
@@ -23,6 +25,30 @@ export default function ProjectsPage() {
     const [isAddModalOpen, setIsAddModalOpen] = useState(false);
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [projectToDelete, setProjectToDelete] = useState<Project | null>(null);
+    const handleDeleteProject = async () => {
+        if (!projectToDelete) return;
+
+        const token = localStorage.getItem("token");
+        try {
+            const res = await fetch(`/api/projects/${projectToDelete.id}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${token}`
+                }
+            });
+
+            if (res.ok) {
+                fetchProjects();
+                setIsDeleteModalOpen(false);
+            } else {
+                console.error("Erreur de suppression");
+            }
+        } catch (error) {
+            console.error("Erreur:", error);
+        }
+    };
     const fetchProjects = async () => {
         const token = localStorage.getItem("token");
         const res = await fetch("/api/projects", {
@@ -88,7 +114,12 @@ export default function ProjectsPage() {
                                         className="text-blue-600 hover:text-blue-800">
                                         Éditer
                                     </button>
-                                    <button className="text-secondary hover:text-secondary-light transition-colors">
+                                    <button
+                                        onClick={() => {
+                                            setProjectToDelete(project);
+                                            setIsDeleteModalOpen(true);
+                                        }}
+                                        className="text-secondary hover:text-secondary-light transition-colors">
                                         Supprimer
                                     </button>
                                 </td>
@@ -107,6 +138,12 @@ export default function ProjectsPage() {
                 onClose={() => setIsEditModalOpen(false)}
                 onSuccess={fetchProjects}
                 project={selectedProject}
+            />
+            <DeleteProjectModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteProject}
+                projectTitle={projectToDelete?.title || ""}
             />
         </div>
     );

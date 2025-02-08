@@ -7,11 +7,12 @@ import { X } from "lucide-react";
 type Project = {
     id: string;
     title: string;
-    description: string;
+    description?: string;
     clientId: string;
     startDate: string;
     endDate?: string;
     status: string;
+
 };
 type Client = {
     id: string;
@@ -39,7 +40,7 @@ export default function EditProjectModal({ isOpen, onClose, onSuccess, project }
         if (project) {
             setFormData({
                 title: project.title,
-                description: project.description,
+                description: project.description || "", // Ajoutez une valeur par défaut
                 clientId: project.clientId,
                 startDate: project.startDate.split('T')[0],
                 endDate: project.endDate?.split('T')[0] || "",
@@ -54,11 +55,7 @@ export default function EditProjectModal({ isOpen, onClose, onSuccess, project }
 
     const fetchClients = async () => {
         const token = localStorage.getItem("token");
-        const formattedData = {
-            ...formData,
-            startDate: new Date(formData.startDate).toISOString(),
-            endDate: formData.endDate ? new Date(formData.endDate).toISOString() : undefined
-        };
+
         const res = await fetch("/api/clients", {
             headers: { Authorization: `Bearer ${token}` }
         });

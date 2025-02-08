@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { UserPlus, Search } from 'lucide-react';
 import AddClientModal from '@/app/components/ui/addClientModal';
 import EditClientModal from '@/app/components/ui/EditClientModal';
+import DeleteClientModal from "@/app/components/ui/DeleteClientModal";
 
 type Client = {
     id: string;
@@ -19,18 +20,28 @@ export default function ClientsPage() {
     const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
 
-    const handleDeleteClient = async (clientId: string) => {
+    const handleDeleteClient = async () => {
+        if (!clientToDelete) return;
+
         const token = localStorage.getItem("token");
-        const res = await fetch(`/api/clients/${clientId}`, {
-            method: "DELETE",
-            headers: { Authorization: `Bearer ${token}` }
-        });
+        try {
+            const res = await fetch(`/api/clients/${clientToDelete.id}`, {
+                method: "DELETE",
+                headers: { Authorization: `Bearer ${token}` }
+            });
 
-        if (res.ok) {
-            fetchClients();
+            if (res.ok) {
+                fetchClients();
+                setIsDeleteModalOpen(false);
+            }
+        } catch (error) {
+            console.error("Erreur:", error);
         }
     };
+
 
     const fetchClients = async () => {
         const token = localStorage.getItem("token");
@@ -107,9 +118,8 @@ export default function ClientsPage() {
                                         </button>
                                         <button
                                             onClick={() => {
-                                                if (confirm('Supprimer ce client ?')) {
-                                                    handleDeleteClient(client.id);
-                                                }
+                                                setClientToDelete(client);
+                                                setIsDeleteModalOpen(true);
                                             }}
                                             className="text-secondary hover:text-secondary-light"
                                         >
@@ -135,6 +145,12 @@ export default function ClientsPage() {
                 onClose={() => setIsEditModalOpen(false)}
                 onSuccess={fetchClients}
                 client={selectedClient}
+            />
+            <DeleteClientModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={handleDeleteClient}
+                clientName={clientToDelete?.name || ""}
             />
         </div>
     );

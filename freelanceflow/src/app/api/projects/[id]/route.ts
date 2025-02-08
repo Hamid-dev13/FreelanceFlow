@@ -40,11 +40,9 @@ export async function GET(
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
 }
-
-// PUT /api/projects/[id] - Modifier un projet
 export async function PUT(
     req: Request,
-    { params }: { params: { id: string } }
+    context: { params: { id: string } }
 ) {
     try {
         const headersList = await headers();
@@ -56,33 +54,16 @@ export async function PUT(
 
         const { title, description, clientId, startDate, endDate, status } = await req.json();
 
-        // Vérifier que le client existe et appartient à l'utilisateur si fourni
-        if (clientId) {
-            const client = await prisma.client.findUnique({
-                where: {
-                    id: clientId,
-                    userId
-                }
-            });
-
-            if (!client) {
-                return NextResponse.json(
-                    { error: "Client non trouvé" },
-                    { status: 404 }
-                );
-            }
-        }
-
         const project = await prisma.project.update({
             where: {
-                id: params.id,
+                id: context.params.id,
                 userId
             },
             data: {
                 title,
                 description,
-                startDate,
-                endDate,
+                startDate: new Date(startDate).toISOString(),
+                endDate: endDate ? new Date(endDate).toISOString() : null,
                 status,
                 clientId
             },
@@ -99,10 +80,10 @@ export async function PUT(
 
         return NextResponse.json(project);
     } catch (error) {
+        console.error(error);
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
 }
-
 // DELETE /api/projects/[id] - Supprimer un projet
 export async function DELETE(
     req: Request,

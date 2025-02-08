@@ -3,8 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { LogIn, UserPlus, Loader2 } from 'lucide-react';
+import { LogIn, UserPlus, Loader2, ArrowLeft, Zap } from 'lucide-react';
+import Image from 'next/image';
 import '../styles/theme.css';
+import { Button } from '../Stylecomponents/Button';
+import { GradientText } from '../Stylecomponents/GradientText';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -43,71 +46,87 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-gray-900 relative flex flex-col justify-center py-12 sm:px-6 lg:px-8">
-            {/* Background pattern */}
-            <div className="absolute inset-0 z-0">
-                <div className="absolute inset-y-0 right-1/2 w-1/3 bg-gradient-to-r from-primary/20 to-secondary/20 blur-3xl opacity-30" />
-                <div className="absolute inset-y-0 right-0 w-1/3 bg-gradient-to-l from-secondary/20 to-accent/20 blur-3xl opacity-30" />
-            </div>
-
-            <div className="sm:mx-auto sm:w-full sm:max-w-md z-10">
-                <h2 className="mt-6 text-center text-3xl font-semibold tracking-tight text-white">
-                    Connectez-vous à votre compte
-                </h2>
-            </div>
-
-            <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md z-10">
-                <div className="bg-gray-800 py-8 px-4 shadow-[0_0_50px_0_rgba(0,0,0,0.3)] sm:rounded-xl sm:px-10 border border-gray-700">
-                    {error && (
-                        <div className="mb-4 bg-secondary/10 border-l-4 border-secondary p-4 rounded-r-lg">
-                            <p className="text-secondary-light">{error}</p>
+        <div className="min-h-screen bg-black">
+            {/* Header */}
+            <header className="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-sm border-b border-gray-800">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center h-16">
+                        <div className="flex items-center">
+                            <Link href="/" className="flex items-center gap-2 text-white">
+                                <Zap className="h-8 w-8 text-[#FF4405]" />
+                                <GradientText className="text-xl font-bold">Freelanceflow</GradientText>
+                            </Link>
                         </div>
-                    )}
+                        <Button
+                            variant="primary"
+                            size="sm"
+                            onClick={() => router.push('/')}
+                        >
+                            <ArrowLeft className="h-4 w-4" />
+                            Retour
+                        </Button>
+                    </div>
+                </div>
+            </header>
 
-                    <form className="space-y-6" onSubmit={handleSubmit}>
-                        <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-gray-300">
-                                Email
-                            </label>
-                            <div className="mt-1">
-                                <input
-                                    id="email"
-                                    name="email"
-                                    type="email"
-                                    autoComplete="email"
-                                    required
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    className="appearance-none block w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg shadow-sm placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
-                                    placeholder="vous@exemple.com"
-                                />
+            {/* Main content */}
+            <div className="flex min-h-screen">
+                {/* Left side - Login form */}
+                <div className="w-full lg:w-1/2 flex flex-col justify-center px-4 sm:px-6 lg:px-8 pt-24 pb-12">
+                    <div className="max-w-md w-full mx-auto">
+                        <h2 className="text-3xl font-semibold tracking-tight text-white mb-8">
+                            <GradientText>Connectez-vous</GradientText> à votre compte
+                        </h2>
+
+                        {error && (
+                            <div className="mb-6 bg-[#7928CA]/10 border-l-4 border-[#7928CA] p-4 rounded-r-lg">
+                                <p className="text-[#8A3DD9]">{error}</p>
                             </div>
-                        </div>
+                        )}
 
-                        <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-gray-300">
-                                Mot de passe
-                            </label>
-                            <div className="mt-1">
-                                <input
-                                    id="password"
-                                    name="password"
-                                    type="password"
-                                    autoComplete="current-password"
-                                    required
-                                    value={password}
-                                    onChange={(e) => setPassword(e.target.value)}
-                                    className="appearance-none block w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg shadow-sm placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all duration-200"
-                                    placeholder="••••••••"
-                                />
+                        <form className="space-y-6" onSubmit={handleSubmit}>
+                            <div>
+                                <label htmlFor="email" className="block text-sm font-medium text-gray-300">
+                                    Email
+                                </label>
+                                <div className="mt-1">
+                                    <input
+                                        id="email"
+                                        name="email"
+                                        type="email"
+                                        autoComplete="email"
+                                        required
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        className="appearance-none block w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg shadow-sm placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-[#FF4405] focus:border-[#FF4405] transition-all duration-200"
+                                        placeholder="vous@exemple.com"
+                                    />
+                                </div>
                             </div>
-                        </div>
 
-                        <div>
-                            <button
+                            <div>
+                                <label htmlFor="password" className="block text-sm font-medium text-gray-300">
+                                    Mot de passe
+                                </label>
+                                <div className="mt-1">
+                                    <input
+                                        id="password"
+                                        name="password"
+                                        type="password"
+                                        autoComplete="current-password"
+                                        required
+                                        value={password}
+                                        onChange={(e) => setPassword(e.target.value)}
+                                        className="appearance-none block w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg shadow-sm placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-[#FF4405] focus:border-[#FF4405] transition-all duration-200"
+                                        placeholder="••••••••"
+                                    />
+                                </div>
+                            </div>
+
+                            <Button
                                 type="submit"
                                 disabled={loading}
-                                className="w-full flex justify-center items-center gap-2 py-2.5 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-gradient-to-r from-primary to-secondary hover:from-primary-light hover:to-secondary-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_0_15px_rgba(var(--color-primary),0.3)] hover:shadow-[0_0_25px_rgba(var(--color-primary),0.5)]"
+                                className="w-full"
                             >
                                 {loading ? (
                                     <>
@@ -120,30 +139,42 @@ export default function LoginPage() {
                                         <span>Se connecter</span>
                                     </>
                                 )}
-                            </button>
-                        </div>
-                    </form>
+                            </Button>
+                        </form>
 
-                    <div className="mt-6">
-                        <div className="relative">
-                            <div className="absolute inset-0 flex items-center">
-                                <div className="w-full border-t border-gray-700" />
+                        <div className="mt-6">
+                            <div className="relative">
+                                <div className="absolute inset-0 flex items-center">
+                                    <div className="w-full border-t border-gray-700" />
+                                </div>
+                                <div className="relative flex justify-center text-sm">
+                                    <span className="px-2 bg-black text-gray-400">Pas encore inscrit ?</span>
+                                </div>
                             </div>
-                            <div className="relative flex justify-center text-sm">
-                                <span className="px-2 bg-gray-800 text-gray-400">Pas encore inscrit ?</span>
-                            </div>
-                        </div>
 
-                        <div className="mt-6 text-center">
-                            <Link
-                                href="/SignUp"
-                                className="inline-flex items-center gap-2 font-medium text-primary hover:text-primary-light transition-colors duration-200 mr-5"
-                            >
-                                <UserPlus className="h-4 w-4" />
-                                <span>Créer un compte</span>
-                            </Link>
+                            <div className="mt-6 text-center">
+                                <Link
+                                    href="/SignUp"
+                                    className="inline-flex items-center gap-2 font-medium text-[#FF4405] hover:text-[#FF5D26] transition-colors duration-200"
+                                >
+                                    <UserPlus className="h-4 w-4" />
+                                    <span>Créer un compte</span>
+                                </Link>
+                            </div>
                         </div>
                     </div>
+                </div>
+
+                {/* Right side - Image */}
+                <div className="hidden lg:block lg:w-1/2 relative">
+                    <div className="absolute inset-0 bg-gradient-to-br from-black via-transparent to-transparent z-10" />
+                    <Image
+                        src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80"
+                        alt="Analytics Dashboard"
+                        fill
+                        className="object-cover"
+                        priority
+                    />
                 </div>
             </div>
         </div>

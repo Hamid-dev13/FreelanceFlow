@@ -109,7 +109,8 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
             console.log("Erreur : aucun token trouvé.");
             return;
         }
-
+        const authHeader = `Bearer ${token}`;
+        console.log("Header Authorization:", authHeader);
         try {
             const res = await fetch("/api/clients", {
                 method: "POST",

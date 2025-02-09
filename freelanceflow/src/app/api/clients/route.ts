@@ -2,6 +2,22 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 
+// Définition des headers CORS
+const CORS_HEADERS = {
+    "Access-Control-Allow-Origin": "https://freelance-flow-theta.vercel.app/", // Remplace par ton vrai domaine Vercel
+    "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type, Authorization, x-user-id",
+    "Access-Control-Allow-Credentials": "true"
+};
+
+// Gestion de la requête OPTIONS (prévol CORS)
+export async function OPTIONS() {
+    return new Response(null, {
+        status: 204,
+        headers: CORS_HEADERS
+    });
+}
+
 // GET /api/clients - Liste des clients
 export async function GET() {
     try {
@@ -9,7 +25,7 @@ export async function GET() {
         const userId = headersList.get("x-user-id");
 
         if (!userId) {
-            return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+            return NextResponse.json({ error: "Non autorisé" }, { status: 401, headers: CORS_HEADERS });
         }
 
         const clients = await prisma.client.findMany({
@@ -17,13 +33,13 @@ export async function GET() {
             orderBy: { createdAt: 'desc' }
         });
 
-        return NextResponse.json(clients);
+        return NextResponse.json(clients, { headers: CORS_HEADERS });
     } catch (error) {
-        return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+        return NextResponse.json({ error: "Erreur serveur" }, { status: 500, headers: CORS_HEADERS });
     }
 }
 
-// Dans la route POST /api/clients
+// POST /api/clients - Création d'un client
 export async function POST(req: Request) {
     try {
         const headersList = await headers();
@@ -32,67 +48,52 @@ export async function POST(req: Request) {
         if (!userId) {
             return NextResponse.json(
                 { error: "Non autorisé" },
-                { status: 401 }
+                { status: 401, headers: CORS_HEADERS }
             );
         }
 
         const { name, email, phone } = await req.json();
 
-        // Validation de base
         if (!name || !email) {
             return NextResponse.json(
                 { error: "Nom et email requis" },
-                { status: 400 }
+                { status: 400, headers: CORS_HEADERS }
             );
         }
 
-        // Vérifier si l'email est déjà utilisé
         const existingClientEmail = await prisma.client.findFirst({
-            where: {
-                email,
-                userId
-            }
+            where: { email, userId }
         });
 
         if (existingClientEmail) {
             return NextResponse.json(
                 { error: "Cette adresse email est déjà attribuée à un client" },
-                { status: 400 }
+                { status: 400, headers: CORS_HEADERS }
             );
         }
 
-        // Vérifier si le téléphone est déjà utilisé (si fourni)
         if (phone) {
             const existingClientPhone = await prisma.client.findFirst({
-                where: {
-                    phone,
-                    userId
-                }
+                where: { phone, userId }
             });
 
             if (existingClientPhone) {
                 return NextResponse.json(
                     { error: "Ce numéro de téléphone est déjà attribué à un client" },
-                    { status: 400 }
+                    { status: 400, headers: CORS_HEADERS }
                 );
             }
         }
 
-        // Création du client si tout est OK
         const client = await prisma.client.create({
-            data: {
-                name,
-                email,
-                phone,
-                userId
-            }
+            data: { name, email, phone, userId }
         });
 
-        return NextResponse.json(client, { status: 201 });
+        return NextResponse.json(client, { status: 201, headers: CORS_HEADERS });
     } catch (error) {
         return NextResponse.json(
             { error: "Erreur lors de la création du client" },
-            { status: 500 }
+            { status: 500, headers: CORS_HEADERS }
         );
     }
 }

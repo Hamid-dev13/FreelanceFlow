@@ -1,6 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
+export async function POST(req: NextRequest) {
+    try {
+        const { name, email, phone, userId } = await req.json(); // Assure-toi de recevoir `userId`
+
+        if (!name || !email || !userId) { // Vérifie également que `userId` est fourni
+            return NextResponse.json({ error: "Nom, email et userId requis" }, { status: 400 });
+        }
+
+        const existingClientEmail = await prisma.client.findFirst({
+            where: { email }
+        });
+
+        if (existingClientEmail) {
+            return NextResponse.json({ error: "Cette adresse email est déjà attribuée" }, { status: 400 });
+        }
+
+        // Crée le client en incluant `userId`
+        const client = await prisma.client.create({
+            data: {
+                name,
+                email,
+                phone,
+                userId, // Inclure `userId` pour la relation avec l'utilisateur
+            }
+        });
+
+        return NextResponse.json(client, { status: 201 });
+    } catch (error) {
+        return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+    }
+}
 
 // GET /api/clients/[id] - Détail d'un client
 export async function GET(

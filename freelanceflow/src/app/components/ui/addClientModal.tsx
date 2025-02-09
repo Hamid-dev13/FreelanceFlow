@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, AlertCircle } from "lucide-react";
 import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
-
 
 // Liste des préfixes téléphoniques courants
 const PHONE_PREFIXES = [
@@ -22,8 +21,6 @@ type Props = {
 };
 
 export default function AddClientModal({ isOpen, onClose }: Props) {
-
-
     const [formData, setFormData] = useState({
         name: "",
         email: "",
@@ -36,6 +33,15 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
         phone?: string;
         server?: string;
     }>({});
+    const [token, setToken] = useState<string | null>(null);
+
+    useEffect(() => {
+        // Vérification si 'localStorage' est disponible côté client
+        if (typeof window !== 'undefined') {
+            const storedToken = localStorage.getItem("token");
+            setToken(storedToken);
+        }
+    }, []);
 
     const validateEmail = (email: string) => {
         const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -91,7 +97,10 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
             return;
         }
 
-        const token = localStorage.getItem("token");
+        if (!token) {
+            setErrors({ server: "Aucun token trouvé" });
+            return;
+        }
 
         try {
             const res = await fetch("/api/clients", {
@@ -107,7 +116,6 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
             });
 
             if (res.ok) {
-
                 handleClose();
             } else {
                 // Gestion des erreurs du serveur 

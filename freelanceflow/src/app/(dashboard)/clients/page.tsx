@@ -7,7 +7,6 @@ import {
     Users,
     Mail,
     Phone,
-    Briefcase,
     Edit2,
     Trash2,
     AlertCircle,
@@ -98,7 +97,8 @@ export default function ClientsPage() {
 
     return (
         <div className="bg-gray-900 rounded-xl shadow-lg border border-gray-800">
-            <div className="px-6 py-4 border-b border-gray-800">
+            {/* Header Section */}
+            <div className="p-4 sm:p-6 border-b border-gray-800">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex items-center gap-3">
                         <Users className="h-6 w-6 text-[#FF4405]" />
@@ -106,7 +106,7 @@ export default function ClientsPage() {
                     </div>
                     <button
                         onClick={() => setIsAddClientModalOpen(true)}
-                        className="group flex items-center justify-center gap-2 px-4 py-2 bg-[#FF4405] hover:bg-[#ff5c26] text-white rounded-lg shadow-lg transition-all duration-300 hover:scale-105"
+                        className="w-full sm:w-auto group flex items-center justify-center gap-2 px-4 py-2 bg-[#FF4405] hover:bg-[#ff5c26] text-white rounded-lg shadow-lg transition-all duration-300 hover:scale-105"
                     >
                         <UserPlus className="h-4 w-4 group-hover:rotate-12 transition-transform duration-300" />
                         <span>Nouveau Client</span>
@@ -126,77 +126,130 @@ export default function ClientsPage() {
                 </div>
             </div>
 
-            <div className="p-6">
+            {/* Clients List */}
+            <div className="p-4 sm:p-6">
                 {filteredClients.length > 0 ? (
-                    <div className="overflow-x-auto">
-                        <table className="w-full">
-                            <thead className="bg-gray-800 text-gray-300 text-sm">
-                                <tr>
-                                    <th className="px-4 py-3 text-left font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <Users className="h-4 w-4 text-[#FF4405]" />
-                                            Nom
-                                        </div>
-                                    </th>
-                                    <th className="px-4 py-3 text-left font-medium">
+                    <div className="grid grid-cols-1 gap-4">
+                        {/* Desktop View */}
+                        <div className="hidden sm:block overflow-x-auto">
+                            <table className="min-w-full divide-y divide-gray-800">
+                                <thead className="bg-gray-800">
+                                    <tr>
+                                        <th scope="col" className="px-4 py-3 text-left">
+                                            <div className="flex items-center gap-2">
+                                                <Users className="h-4 w-4 text-[#FF4405]" />
+                                                <span className="text-sm font-medium text-gray-300">Nom</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" className="px-4 py-3 text-left">
+                                            <div className="flex items-center gap-2">
+                                                <Mail className="h-4 w-4 text-[#FF4405]" />
+                                                <span className="text-sm font-medium text-gray-300">Email</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" className="px-4 py-3 text-left">
+                                            <div className="flex items-center gap-2">
+                                                <Phone className="h-4 w-4 text-[#FF4405]" />
+                                                <span className="text-sm font-medium text-gray-300">Téléphone</span>
+                                            </div>
+                                        </th>
+                                        <th scope="col" className="px-4 py-3 text-right">
+                                            <span className="text-sm font-medium text-gray-300">Actions</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-gray-800">
+                                    {filteredClients.map((client) => (
+                                        <tr
+                                            key={client.id}
+                                            className="group hover:bg-gray-800/50 transition-colors duration-200"
+                                        >
+                                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                {client.name}
+                                            </td>
+                                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                {client.email}
+                                            </td>
+                                            <td className="px-4 py-4 whitespace-nowrap text-sm text-gray-300">
+                                                {client.phone || '-'}
+                                            </td>
+                                            <td className="px-4 py-4 whitespace-nowrap text-right text-sm">
+                                                <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                                                    <button
+                                                        onClick={() => {
+                                                            setSelectedClient(client);
+                                                            setIsEditModalOpen(true);
+                                                        }}
+                                                        className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                                    >
+                                                        <Edit2 className="h-4 w-4" />
+                                                        <span>Éditer</span>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => {
+                                                            setClientToDelete(client);
+                                                            setIsDeleteModalOpen(true);
+                                                        }}
+                                                        className="inline-flex items-center gap-1 text-red-400 hover:text-red-300 transition-colors duration-200"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                        <span>Supprimer</span>
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Mobile View */}
+                        <div className="sm:hidden space-y-4">
+                            {filteredClients.map((client) => (
+                                <div
+                                    key={client.id}
+                                    className="bg-gray-800/50 rounded-lg p-4 space-y-3 border border-gray-700"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <h3 className="text-white font-medium">{client.name}</h3>
+                                    </div>
+
+                                    <div className="space-y-2 text-sm text-gray-300">
                                         <div className="flex items-center gap-2">
                                             <Mail className="h-4 w-4 text-[#FF4405]" />
-                                            Email
+                                            <span>{client.email}</span>
                                         </div>
-                                    </th>
-                                    <th className="px-4 py-3 text-left font-medium">
                                         <div className="flex items-center gap-2">
                                             <Phone className="h-4 w-4 text-[#FF4405]" />
-                                            Téléphone
+                                            <span>{client.phone || '-'}</span>
                                         </div>
-                                    </th>
-                                    <th className="px-4 py-3 text-left font-medium">
-                                        <div className="flex items-center gap-2">
-                                            <Briefcase className="h-4 w-4 text-[#FF4405]" />
-                                            Projets
-                                        </div>
-                                    </th>
-                                    <th className="px-4 py-3 text-left font-medium">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-gray-800 text-gray-300">
-                                {filteredClients.map((client) => (
-                                    <tr
-                                        key={client.id}
-                                        className="group border-gray-800 hover:bg-gray-800 transition-colors duration-200"
-                                    >
-                                        <td className="px-4 py-3">{client.name}</td>
-                                        <td className="px-4 py-3">{client.email}</td>
-                                        <td className="px-4 py-3">{client.phone || '-'}</td>
-                                        <td className="px-4 py-3">-</td>
-                                        <td className="px-4 py-3">
-                                            <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                                                <button
-                                                    onClick={() => {
-                                                        setSelectedClient(client);
-                                                        setIsEditModalOpen(true);
-                                                    }}
-                                                    className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors duration-200"
-                                                >
-                                                    <Edit2 className="h-4 w-4" />
-                                                    Éditer
-                                                </button>
-                                                <button
-                                                    onClick={() => {
-                                                        setClientToDelete(client);
-                                                        setIsDeleteModalOpen(true);
-                                                    }}
-                                                    className="flex items-center gap-1 text-red-400 hover:text-red-300 transition-colors duration-200"
-                                                >
-                                                    <Trash2 className="h-4 w-4" />
-                                                    Supprimer
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                    </div>
+
+                                    <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-700">
+                                        <button
+                                            onClick={() => {
+                                                setSelectedClient(client);
+                                                setIsEditModalOpen(true);
+                                            }}
+                                            className="flex items-center gap-1 text-blue-400 hover:text-blue-300 transition-colors duration-200"
+                                        >
+                                            <Edit2 className="h-4 w-4" />
+                                            <span>Éditer</span>
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                setClientToDelete(client);
+                                                setIsDeleteModalOpen(true);
+                                            }}
+                                            className="flex items-center gap-1 text-red-400 hover:text-red-300 transition-colors duration-200"
+                                        >
+                                            <Trash2 className="h-4 w-4" />
+                                            <span>Supprimer</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 ) : (
                     <div className="text-center py-12">
@@ -206,7 +259,9 @@ export default function ClientsPage() {
                 )}
             </div>
 
-            <div className="fixed inset-0 flex items-center justify-center z-50" style={{ display: isAddClientModalOpen || isEditModalOpen || isDeleteModalOpen ? 'flex' : 'none' }}>
+            {/* Modals */}
+            <div className="fixed inset-0 flex items-center justify-center z-50"
+                style={{ display: isAddClientModalOpen || isEditModalOpen || isDeleteModalOpen ? 'flex' : 'none' }}>
                 <AddClientModal
                     isOpen={isAddClientModalOpen}
                     onClose={() => {

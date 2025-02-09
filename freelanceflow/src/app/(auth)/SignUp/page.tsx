@@ -57,7 +57,7 @@ export default function SignUpPage() {
             const data = await res.json();
 
             if (res.ok) {
-                router.push("/");
+                router.push("/login");
             } else {
                 setError(data.error || "Erreur lors de l'inscription");
             }

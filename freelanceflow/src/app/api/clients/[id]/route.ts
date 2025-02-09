@@ -32,7 +32,7 @@ export async function GET(
     }
 }
 
-// PUT /api/clients/[id] - Modifier un client
+// PUT /api/clients/[id]
 export async function PUT(
     req: Request,
     { params }: { params: { id: string } }
@@ -47,6 +47,53 @@ export async function PUT(
 
         const { name, email, phone } = await req.json();
 
+        // Validation des champs obligatoires
+        if (!name || !email) {
+            return NextResponse.json(
+                { error: "Nom et email requis" },
+                { status: 400 }
+            );
+        }
+
+        // Vérifier si l'email existe déjà pour un autre client
+        const existingClientEmail = await prisma.client.findFirst({
+            where: {
+                email,
+                userId,
+                NOT: {
+                    id: params.id // Exclure le client actuel de la vérification
+                }
+            }
+        });
+
+        if (existingClientEmail) {
+            return NextResponse.json(
+                { error: "Cette adresse email est déjà attribuée à un autre client" },
+                { status: 400 }
+            );
+        }
+
+        // Vérifier si le téléphone existe déjà pour un autre client
+        if (phone) {
+            const existingClientPhone = await prisma.client.findFirst({
+                where: {
+                    phone,
+                    userId,
+                    NOT: {
+                        id: params.id // Exclure le client actuel de la vérification
+                    }
+                }
+            });
+
+            if (existingClientPhone) {
+                return NextResponse.json(
+                    { error: "Ce numéro de téléphone est déjà attribué à un autre client" },
+                    { status: 400 }
+                );
+            }
+        }
+
+        // Mise à jour du client
         const client = await prisma.client.update({
             where: {
                 id: params.id,
@@ -61,6 +108,7 @@ export async function PUT(
 
         return NextResponse.json(client);
     } catch (error) {
+        console.error("Erreur lors de la modification du client:", error);
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
 }

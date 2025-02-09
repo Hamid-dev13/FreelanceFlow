@@ -14,7 +14,6 @@ import {
     BarChart2,
     Layout
 } from 'lucide-react';
-import { GradientText } from '@/app/Stylecomponents/GradientText';
 
 type Project = {
     id: string;
@@ -98,12 +97,12 @@ export default function DashboardPage() {
 
     if (loading) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
+            <div className="min-h-screen bg-black flex items-center justify-center p-4">
                 <div className="flex flex-col items-center gap-4 text-[#FF4405]">
                     <Layout className="h-12 w-12 animate-pulse" />
                     <div className="flex items-center gap-2">
                         <Loader2 className="h-6 w-6 animate-spin" />
-                        <span>Chargement du tableau de bord...</span>
+                        <span className="text-sm sm:text-base">Chargement du tableau de bord...</span>
                     </div>
                 </div>
             </div>
@@ -112,126 +111,102 @@ export default function DashboardPage() {
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 space-y-6 sm:space-y-8">
                 {/* Header Section with Logo */}
-                <div className="flex items-center justify-between bg-gray-900/50 backdrop-blur-lg rounded-2xl p-8 border border-gray-800 shadow-lg animate-fade-in">
-                    <div>
-                        <div className="flex items-center gap-3 mb-3">
-                            <Layout className="h-8 w-8 text-[#FF4405]" />
-                            <h1 className="text-3xl font-semibold">
-                                <GradientText>Tableau de Bord</GradientText>
+                <div className="flex flex-col sm:flex-row items-center sm:justify-between bg-gray-900/50 backdrop-blur-lg rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-800 shadow-lg animate-fade-in">
+                    <div className="text-center sm:text-left mb-4 sm:mb-0">
+                        <div className="flex items-center justify-center sm:justify-start gap-3 mb-3">
+                            <Layout className="h-6 w-6 sm:h-8 sm:w-8 text-[#FF4405]" />
+                            <h1 className="text-2xl sm:text-3xl font-semibold">
+                                Tableau de Bord
                             </h1>
                         </div>
-                        <p className="text-gray-400">
+                        <p className="text-sm sm:text-base text-gray-400">
                             Visualisez et gérez vos projets en un coup d'œil
                         </p>
                     </div>
-                    <BarChart2 className="h-16 w-16 text-[#FF4405] opacity-50" />
+                    <BarChart2 className="h-12 w-12 sm:h-16 sm:w-16 text-[#FF4405] opacity-50" />
                 </div>
 
                 {/* Stats Grid with Animations */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div className="group bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-6 shadow-lg hover:border-[#FF4405]/50 transition-all duration-300 hover:scale-105">
-                        <div className="flex items-center gap-4">
-                            <Users className="h-8 w-8 text-[#FF4405] group-hover:rotate-12 transition-transform duration-300" />
-                            <div>
-                                <h3 className="text-gray-400 text-sm">Clients Totaux</h3>
-                                <p className="text-3xl font-semibold mt-1 text-white">{stats.totalClients}</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                    {[
+                        { icon: Users, label: "Clients Totaux", value: stats.totalClients },
+                        { icon: Briefcase, label: "Projets Actifs", value: stats.activeProjects },
+                        { icon: CheckCircle, label: "Projets Terminés", value: stats.completedProjects },
+                        { icon: TrendingUp, label: "Nouveaux Projets (ce mois)", value: stats.totalProjectsThisMonth }
+                    ].map(({ icon: Icon, label, value }) => (
+                        <div key={label} className="group bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-4 sm:p-6 shadow-lg hover:border-[#FF4405]/50 transition-all duration-300 hover:scale-[1.02]">
+                            <div className="flex items-center gap-3 sm:gap-4">
+                                <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-[#FF4405] group-hover:rotate-12 transition-transform duration-300" />
+                                <div>
+                                    <h3 className="text-gray-400 text-xs sm:text-sm">{label}</h3>
+                                    <p className="text-2xl sm:text-3xl font-semibold mt-1 text-white">{value}</p>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className="group bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-6 shadow-lg hover:border-[#FF4405]/50 transition-all duration-300 hover:scale-105">
-                        <div className="flex items-center gap-4">
-                            <Briefcase className="h-8 w-8 text-[#FF4405] group-hover:rotate-12 transition-transform duration-300" />
-                            <div>
-                                <h3 className="text-gray-400 text-sm">Projets Actifs</h3>
-                                <p className="text-3xl font-semibold mt-1 text-white">{stats.activeProjects}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="group bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-6 shadow-lg hover:border-[#FF4405]/50 transition-all duration-300 hover:scale-105">
-                        <div className="flex items-center gap-4">
-                            <CheckCircle className="h-8 w-8 text-[#FF4405] group-hover:rotate-12 transition-transform duration-300" />
-                            <div>
-                                <h3 className="text-gray-400 text-sm">Projets Terminés</h3>
-                                <p className="text-3xl font-semibold mt-1 text-white">{stats.completedProjects}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div className="group bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-6 shadow-lg hover:border-[#FF4405]/50 transition-all duration-300 hover:scale-105">
-                        <div className="flex items-center gap-4">
-                            <TrendingUp className="h-8 w-8 text-[#FF4405] group-hover:rotate-12 transition-transform duration-300" />
-                            <div>
-                                <h3 className="text-gray-400 text-sm">Nouveaux Projets (ce mois)</h3>
-                                <p className="text-3xl font-semibold mt-1 text-white">{stats.totalProjectsThisMonth}</p>
-                            </div>
-                        </div>
-                    </div>
+                    ))}
                 </div>
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     {/* Upcoming Projects */}
-                    <div className="bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-6 shadow-lg">
-                        <div className="flex items-center gap-3 mb-6">
-                            <Calendar className="h-6 w-6 text-[#FF4405]" />
-                            <h3 className="text-xl font-semibold">
-                                <GradientText>Échéances à venir</GradientText>
-                            </h3>
+                    <div className="bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-4 sm:p-6 shadow-lg">
+                        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                            <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-[#FF4405]" />
+                            <h3 className="text-lg sm:text-xl font-semibold">Échéances à venir</h3>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                             {stats.upcomingDeadlines.map((project) => (
                                 <div
                                     key={project.id}
-                                    className="group flex justify-between items-center border border-gray-800/50 rounded-lg p-4 hover:bg-gray-800/30 transition-all duration-300 hover:border-[#FF4405]/30"
+                                    className="group flex flex-col sm:flex-row sm:justify-between sm:items-center border border-gray-800/50 rounded-lg p-3 sm:p-4 hover:bg-gray-800/30 transition-all duration-300 hover:border-[#FF4405]/30 space-y-2 sm:space-y-0"
                                 >
                                     <div className="flex items-start gap-3">
                                         <AlertCircle className="h-5 w-5 text-[#FF4405] group-hover:rotate-12 transition-transform duration-300" />
                                         <div>
-                                            <h4 className="font-medium text-white">{project.title}</h4>
-                                            <p className="text-sm text-gray-400">Client: {project.client.name}</p>
+                                            <h4 className="font-medium text-sm sm:text-base text-white">{project.title}</h4>
+                                            <p className="text-xs sm:text-sm text-gray-400">Client: {project.client.name}</p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-sm text-gray-400">Échéance</p>
-                                        <p className="font-medium text-[#FF4405]">
+                                    <div className="ml-8 sm:ml-0 sm:text-right">
+                                        <p className="text-xs sm:text-sm text-gray-400">Échéance</p>
+                                        <p className="font-medium text-xs sm:text-sm text-[#FF4405]">
                                             {new Date(project.endDate!).toLocaleDateString()}
                                         </p>
                                     </div>
                                 </div>
                             ))}
                             {stats.upcomingDeadlines.length === 0 && (
-                                <div className="text-center text-gray-400 py-8">
-                                    <Calendar className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                    <p>Aucun projet à échéance proche</p>
+                                <div className="text-center text-gray-400 py-6 sm:py-8">
+                                    <Calendar className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 opacity-50" />
+                                    <p className="text-sm sm:text-base">Aucun projet à échéance proche</p>
                                 </div>
                             )}
                         </div>
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-6 shadow-lg">
-                        <div className="flex items-center gap-3 mb-6">
-                            <Activity className="h-6 w-6 text-[#FF4405]" />
-                            <h3 className="text-xl font-semibold">
-                                <GradientText>Activité Récente</GradientText>
-                            </h3>
+                    <div className="bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-4 sm:p-6 shadow-lg">
+                        <div className="flex items-center gap-3 mb-4 sm:mb-6">
+                            <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-[#FF4405]" />
+                            <h3 className="text-lg sm:text-xl font-semibold">Activité Récente</h3>
                         </div>
-                        <div className="space-y-4">
+                        <div className="space-y-3 sm:space-y-4">
                             {stats.recentProjects.map((project) => (
                                 <div
                                     key={project.id}
-                                    className="group flex justify-between items-center border border-gray-800/50 rounded-lg p-4 hover:bg-gray-800/30 transition-all duration-300 hover:border-[#FF4405]/30"
+                                    className="group flex flex-col sm:flex-row sm:justify-between sm:items-center border border-gray-800/50 rounded-lg p-3 sm:p-4 hover:bg-gray-800/30 transition-all duration-300 hover:border-[#FF4405]/30 space-y-2 sm:space-y-0"
                                 >
                                     <div className="flex items-start gap-3">
                                         <Clock className="h-5 w-5 text-[#FF4405] group-hover:rotate-12 transition-transform duration-300" />
                                         <div>
-                                            <h4 className="font-medium text-white">{project.title}</h4>
-                                            <p className="text-sm text-gray-400">Client: {project.client.name}</p>
+                                            <h4 className="font-medium text-sm sm:text-base text-white">{project.title}</h4>
+                                            <p className="text-xs sm:text-sm text-gray-400">Client: {project.client.name}</p>
                                         </div>
                                     </div>
-                                    <div className="text-right">
-                                        <p className="text-sm text-gray-400">Statut</p>
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${project.status === 'EN_COURS' ? 'bg-blue-900/50 text-blue-200 border border-blue-500/20' :
+                                    <div className="ml-8 sm:ml-0 sm:text-right">
+                                        <p className="text-xs sm:text-sm text-gray-400">Statut</p>
+                                        <span className={`inline-flex items-center px-2 py-0.5 sm:px-2.5 sm:py-0.5 rounded-full text-xs font-medium ${project.status === 'EN_COURS' ? 'bg-blue-900/50 text-blue-200 border border-blue-500/20' :
                                                 project.status === 'TERMINE' ? 'bg-green-900/50 text-green-200 border border-green-500/20' :
                                                     'bg-yellow-900/50 text-yellow-200 border border-yellow-500/20'
                                             }`}>
@@ -242,9 +217,9 @@ export default function DashboardPage() {
                                 </div>
                             ))}
                             {stats.recentProjects.length === 0 && (
-                                <div className="text-center text-gray-400 py-8">
-                                    <Activity className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                    <p>Aucune activité récente</p>
+                                <div className="text-center text-gray-400 py-6 sm:py-8">
+                                    <Activity className="h-10 w-10 sm:h-12 sm:w-12 mx-auto mb-3 opacity-50" />
+                                    <p className="text-sm sm:text-base">Aucune activité récente</p>
                                 </div>
                             )}
                         </div>

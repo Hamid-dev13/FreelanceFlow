@@ -39,6 +39,7 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
         // Vérification si 'localStorage' est disponible côté client
         if (typeof window !== 'undefined') {
             const storedToken = localStorage.getItem("token");
+            console.log("Token récupéré depuis localStorage:", storedToken);
             setToken(storedToken);
         }
     }, []);
@@ -51,14 +52,18 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
     const validatePhone = (phone: string, prefix: string) => {
         try {
             const fullPhone = `${prefix}${phone}`;
-            return isValidPhoneNumber(fullPhone);
+            const isValid = isValidPhoneNumber(fullPhone);
+            console.log(`Validation du numéro de téléphone: ${fullPhone} -> ${isValid}`);
+            return isValid;
         } catch (error) {
+            console.error("Erreur lors de la validation du numéro de téléphone:", error);
             return false;
         }
     };
 
     const handleClose = () => {
         // Réinitialiser le formulaire et les erreurs
+        console.log("Fermeture du modal, réinitialisation des données du formulaire.");
         setFormData({
             name: "",
             email: "",
@@ -71,6 +76,7 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        console.log("Formulaire soumis avec les données :", formData);
         const newErrors: typeof errors = {};
 
         // Validation du nom
@@ -94,11 +100,13 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
         // Si des erreurs existent, on les affiche
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
+            console.log("Erreurs de validation détectées :", newErrors);
             return;
         }
 
         if (!token) {
             setErrors({ server: "Aucun token trouvé" });
+            console.log("Erreur : aucun token trouvé.");
             return;
         }
 
@@ -115,8 +123,10 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                 }),
             });
 
+            console.log("Réponse du serveur:", res.status, res.ok);
             if (res.ok) {
                 handleClose();
+                console.log("Client ajouté avec succès.");
             } else {
                 // Gestion des erreurs du serveur 
                 const errorData = await res.json();
@@ -125,11 +135,12 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                 setErrors({
                     server: errorMessage
                 });
+                console.error("Erreur du serveur:", errorMessage);
             }
         } catch (err) {
             const errorMessage = "Erreur de connexion au serveur";
 
-            console.error(err);
+            console.error("Erreur de connexion:", err);
             setErrors({
                 server: errorMessage
             });
@@ -166,6 +177,7 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                                 onChange={(e) => {
                                     setFormData({ ...formData, name: e.target.value });
                                     setErrors({ ...errors, name: undefined });
+                                    console.log("Nom modifié :", e.target.value);
                                 }}
                                 className={`mt-1 block w-full rounded-lg bg-gray-800 border ${errors.name ? 'border-red-500' : 'border-gray-700'} px-3 py-2 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary`}
                                 required
@@ -181,6 +193,7 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                                 onChange={(e) => {
                                     setFormData({ ...formData, email: e.target.value });
                                     setErrors({ ...errors, email: undefined });
+                                    console.log("Email modifié :", e.target.value);
                                 }}
                                 className={`mt-1 block w-full rounded-lg bg-gray-800 border ${errors.email ? 'border-red-500' : 'border-gray-700'} px-3 py-2 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary`}
                                 required
@@ -196,6 +209,7 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                                     onChange={(e) => {
                                         setFormData({ ...formData, phonePrefix: e.target.value });
                                         setErrors({ ...errors, phone: undefined });
+                                        console.log("Préfixe téléphone modifié :", e.target.value);
                                     }}
                                     className="w-1/3 rounded-lg bg-gray-800 border border-gray-700 px-2 py-2 text-white"
                                 >
@@ -211,6 +225,7 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                                     onChange={(e) => {
                                         setFormData({ ...formData, phone: e.target.value });
                                         setErrors({ ...errors, phone: undefined });
+                                        console.log("Numéro de téléphone modifié :", e.target.value);
                                     }}
                                     placeholder="Numéro de téléphone"
                                     className={`flex-1 block w-full rounded-lg bg-gray-800 border ${errors.phone ? 'border-red-500' : 'border-gray-700'} px-3 py-2 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary`}

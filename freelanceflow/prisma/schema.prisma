@@ -4,10 +4,10 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")  // Ajouter cette ligne
 }
-
 model User {
   id        String    @id @default(uuid())
   email     String    @unique

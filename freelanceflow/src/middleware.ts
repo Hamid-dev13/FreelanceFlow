@@ -3,13 +3,17 @@ import type { NextRequest } from 'next/server'
 import { verifyJWT } from '@/lib/auth/jwt'
 
 export async function middleware(request: NextRequest) {
-    // Si l'URL commence par /api/auth/, on autorise la requête sans vérifier le token
+    // Vérifie si l'URL commence par /api/auth/
     if (request.nextUrl.pathname.startsWith('/api/auth/')) {
         return NextResponse.next()
     }
 
-    // Récupérer le header d'authentification
+    // Récupère le header Authorization
     const authHeader = request.headers.get('Authorization')
+
+    // Log de l'Authorization header
+    console.log("Authorization header:", authHeader);
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return NextResponse.json(
             { error: 'Authentification requise' },
@@ -19,9 +23,13 @@ export async function middleware(request: NextRequest) {
 
     // Extraire le token du header
     const token = authHeader.split(' ')[1]
+    console.log("Token extrait:", token);
 
     // Vérifier la validité du token
     const payload = await verifyJWT(token)
+
+    // Log du payload après la vérification du token
+    console.log("Payload du token:", payload);
 
     if (!payload) {
         return NextResponse.json(
@@ -30,12 +38,15 @@ export async function middleware(request: NextRequest) {
         )
     }
 
-    // Ajouter les informations utilisateur au header de la requête
+    // Ajouter les informations utilisateur dans les headers
     const requestHeaders = new Headers(request.headers)
     requestHeaders.set('x-user-id', payload.userId)
     requestHeaders.set('x-user-email', payload.email)
 
-    // Passer à l'étape suivante avec les nouveaux headers
+    // Log des nouveaux headers
+    console.log("Nouveaux headers:", requestHeaders);
+
+    // Passer à l'étape suivante
     return NextResponse.next({
         request: {
             headers: requestHeaders,

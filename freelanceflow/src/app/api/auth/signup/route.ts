@@ -9,7 +9,15 @@ import { signJWT } from "@/lib/auth/jwt";
 export async function POST(req: Request) {
     try {
         console.log("🔹 Requête reçue pour inscription");
-
+        console.log('🔍 Diagnostic des dépendances :', {
+            bcryptjsVersion: require('bcryptjs/package.json').version,
+            prismaVersion: require('@prisma/client/package.json').version,
+            nodeVersion: process.version
+        })
+        console.log('🔍 Variables environnement :', {
+            DATABASE_URL: process.env.DATABASE_URL ? '✅ Présent' : '❌ Manquant',
+            JWT_SECRET: process.env.JWT_SECRET ? '✅ Présent' : '❌ Manquant'
+        });
         const { email, password, name } = await req.json();
         console.log("🔹 Données reçues :", { email, password: "********", name });
 

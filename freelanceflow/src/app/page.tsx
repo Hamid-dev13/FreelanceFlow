@@ -36,8 +36,8 @@ export default function LandingPage() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          <a href="#" className="text-gray-400 hover:text-white transition-colors">Fonctionnalités</a>
-          <a href="#" className="text-gray-400 hover:text-white transition-colors">À propos</a>
+
+
           <Button
             variant="primary"
             size="sm"

@@ -1,10 +1,7 @@
-"use client";
-
-import { useState, useEffect } from "react";
-import { X, AlertCircle } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { X, AlertCircle, Loader2 } from "lucide-react";
 import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
 
-// Liste des préfixes téléphoniques courants
 const PHONE_PREFIXES = [
     { code: '+33', country: 'France' },
     { code: '+49', country: 'Allemagne' },
@@ -34,9 +31,9 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
         server?: string;
     }>({});
     const [token, setToken] = useState<string | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
-        // Vérification si 'localStorage' est disponible côté client
         if (typeof window !== 'undefined') {
             const storedToken = localStorage.getItem("token");
             console.log("Token récupéré depuis localStorage:", storedToken);
@@ -62,7 +59,6 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
     };
 
     const handleClose = () => {
-        // Réinitialiser le formulaire et les erreurs
         console.log("Fermeture du modal, réinitialisation des données du formulaire.");
         setFormData({
             name: "",
@@ -71,33 +67,33 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
             phonePrefix: "+33"
         });
         setErrors({});
+        setIsSubmitting(false);
         onClose();
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+
+        if (isSubmitting) return; // Empêche les soumissions multiples
+
         console.log("Formulaire soumis avec les données :", formData);
         const newErrors: typeof errors = {};
 
-        // Validation du nom
         if (!formData.name.trim()) {
             newErrors.name = "Le nom est requis";
         }
 
-        // Validation de l'email
         if (!formData.email.trim()) {
             newErrors.email = "L'email est requis";
         } else if (!validateEmail(formData.email)) {
             newErrors.email = "Format d'email invalide";
         }
 
-        // Validation du téléphone (optionnel mais avec format si rempli)
         if (formData.phone.trim() &&
             !validatePhone(formData.phone.replace(/\s/g, ''), formData.phonePrefix)) {
             newErrors.phone = "Numéro de téléphone invalide";
         }
 
-        // Si des erreurs existent, on les affiche
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             console.log("Erreurs de validation détectées :", newErrors);
@@ -109,8 +105,9 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
             console.log("Erreur : aucun token trouvé.");
             return;
         }
-        const authHeader = `Bearer ${token}`;
-        console.log("Header Authorization:", authHeader);
+
+        setIsSubmitting(true);
+
         try {
             const res = await fetch("/api/clients", {
                 method: "POST",
@@ -129,22 +126,21 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                 handleClose();
                 console.log("Client ajouté avec succès.");
             } else {
-                // Gestion des erreurs du serveur 
                 const errorData = await res.json();
                 const errorMessage = errorData.error || "Une erreur est survenue lors de l'ajout du client";
-
                 setErrors({
                     server: errorMessage
                 });
                 console.error("Erreur du serveur:", errorMessage);
+                setIsSubmitting(false);
             }
         } catch (err) {
             const errorMessage = "Erreur de connexion au serveur";
-
             console.error("Erreur de connexion:", err);
             setErrors({
                 server: errorMessage
             });
+            setIsSubmitting(false);
         }
     };
 
@@ -157,7 +153,11 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                 <div className="relative w-full max-w-md rounded-xl bg-gray-900 p-6 shadow-xl border border-gray-800">
                     <div className="mb-4 flex items-center justify-between">
                         <h2 className="text-xl font-semibold text-white">Nouveau Client</h2>
-                        <button onClick={handleClose} className="text-gray-400 hover:text-gray-300 transition-colors">
+                        <button
+                            onClick={handleClose}
+                            className="text-gray-400 hover:text-gray-300 transition-colors"
+                            disabled={isSubmitting}
+                        >
                             <X className="h-6 w-6" />
                         </button>
                     </div>
@@ -178,9 +178,9 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                                 onChange={(e) => {
                                     setFormData({ ...formData, name: e.target.value });
                                     setErrors({ ...errors, name: undefined });
-                                    console.log("Nom modifié :", e.target.value);
                                 }}
                                 className={`mt-1 block w-full rounded-lg bg-gray-800 border ${errors.name ? 'border-red-500' : 'border-gray-700'} px-3 py-2 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary`}
+                                disabled={isSubmitting}
                                 required
                             />
                             {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
@@ -194,9 +194,9 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                                 onChange={(e) => {
                                     setFormData({ ...formData, email: e.target.value });
                                     setErrors({ ...errors, email: undefined });
-                                    console.log("Email modifié :", e.target.value);
                                 }}
                                 className={`mt-1 block w-full rounded-lg bg-gray-800 border ${errors.email ? 'border-red-500' : 'border-gray-700'} px-3 py-2 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary`}
+                                disabled={isSubmitting}
                                 required
                             />
                             {errors.email && <p className="text-red-500 text-sm mt-1">{errors.email}</p>}
@@ -210,9 +210,9 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                                     onChange={(e) => {
                                         setFormData({ ...formData, phonePrefix: e.target.value });
                                         setErrors({ ...errors, phone: undefined });
-                                        console.log("Préfixe téléphone modifié :", e.target.value);
                                     }}
                                     className="w-1/3 rounded-lg bg-gray-800 border border-gray-700 px-2 py-2 text-white"
+                                    disabled={isSubmitting}
                                 >
                                     {PHONE_PREFIXES.map((prefix) => (
                                         <option key={prefix.code} value={prefix.code}>
@@ -226,10 +226,10 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                                     onChange={(e) => {
                                         setFormData({ ...formData, phone: e.target.value });
                                         setErrors({ ...errors, phone: undefined });
-                                        console.log("Numéro de téléphone modifié :", e.target.value);
                                     }}
                                     placeholder="Numéro de téléphone"
                                     className={`flex-1 block w-full rounded-lg bg-gray-800 border ${errors.phone ? 'border-red-500' : 'border-gray-700'} px-3 py-2 text-white placeholder-gray-400 focus:border-primary focus:ring-1 focus:ring-primary`}
+                                    disabled={isSubmitting}
                                 />
                             </div>
                             {errors.phone && <p className="text-red-500 text-sm mt-1">{errors.phone}</p>}
@@ -239,15 +239,24 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
                             <button
                                 type="button"
                                 onClick={handleClose}
-                                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 transition-colors"
+                                className="rounded-lg px-4 py-2 text-sm font-medium text-gray-300 hover:bg-gray-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                disabled={isSubmitting}
                             >
                                 Annuler
                             </button>
                             <button
                                 type="submit"
-                                className="rounded-lg bg-gradient-to-r from-primary to-secondary px-4 py-2 text-sm font-medium text-white shadow-[0_0_15px_rgba(var(--color-primary),0.3)] hover:shadow-[0_0_25px_rgba(var(--color-primary),0.5)] transition-all"
+                                disabled={isSubmitting}
+                                className="rounded-lg bg-gradient-to-r from-primary to-secondary px-4 py-2 text-sm font-medium text-white shadow-[0_0_15px_rgba(var(--color-primary),0.3)] hover:shadow-[0_0_25px_rgba(var(--color-primary),0.5)] transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
                             >
-                                Ajouter
+                                {isSubmitting ? (
+                                    <>
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                        Ajout en cours...
+                                    </>
+                                ) : (
+                                    'Ajouter'
+                                )}
                             </button>
                         </div>
                     </form>

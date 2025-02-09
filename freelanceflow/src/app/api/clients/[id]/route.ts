@@ -1,13 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 
 // GET /api/clients/[id] - Détail d'un client
 export async function GET(
-    req: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const headersList = await headers();
         const userId = headersList.get("x-user-id");
 
@@ -17,7 +18,7 @@ export async function GET(
 
         const client = await prisma.client.findUnique({
             where: {
-                id: params.id,
+                id,
                 userId
             }
         });
@@ -34,10 +35,11 @@ export async function GET(
 
 // PUT /api/clients/[id]
 export async function PUT(
-    req: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const headersList = await headers();
         const userId = headersList.get("x-user-id");
 
@@ -45,7 +47,7 @@ export async function PUT(
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { name, email, phone } = await req.json();
+        const { name, email, phone } = await request.json();
 
         // Validation des champs obligatoires
         if (!name || !email) {
@@ -61,7 +63,7 @@ export async function PUT(
                 email,
                 userId,
                 NOT: {
-                    id: params.id // Exclure le client actuel de la vérification
+                    id // Exclure le client actuel de la vérification
                 }
             }
         });
@@ -80,7 +82,7 @@ export async function PUT(
                     phone,
                     userId,
                     NOT: {
-                        id: params.id // Exclure le client actuel de la vérification
+                        id // Exclure le client actuel de la vérification
                     }
                 }
             });
@@ -96,7 +98,7 @@ export async function PUT(
         // Mise à jour du client
         const client = await prisma.client.update({
             where: {
-                id: params.id,
+                id,
                 userId
             },
             data: {
@@ -114,9 +116,10 @@ export async function PUT(
 }
 
 export async function DELETE(
-    req: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
+    const { id } = await params;
     const headersList = await headers();
     const userId = headersList.get("x-user-id");
 
@@ -126,7 +129,7 @@ export async function DELETE(
 
     await prisma.client.delete({
         where: {
-            id: params.id,
+            id,
             userId
         }
     });

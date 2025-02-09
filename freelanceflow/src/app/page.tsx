@@ -1,7 +1,7 @@
 "use client"
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { Zap, Shield, CheckCircle } from 'lucide-react';
+import { Zap, Shield, CheckCircle, Menu } from 'lucide-react';
 import { Button } from './Stylecomponents/Button';
 import { FeatureCard } from './Stylecomponents/FeatureCard';
 import { GradientText } from './Stylecomponents/GradientText';
@@ -9,6 +9,7 @@ import './styles/theme.css';
 
 export default function LandingPage() {
   const router = useRouter();
+  const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
   const handleStartClick = () => {
     router.push('/login');
@@ -17,14 +18,24 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-black text-white">
       {/* Navigation */}
-      <nav className="px-6 py-4 flex items-center justify-between border-b border-gray-800">
+      <nav className="px-4 sm:px-6 py-4 flex items-center justify-between border-b border-gray-800">
         <div className="flex items-center gap-2">
           <Zap className="w-6 h-6 text-primary" />
           <GradientText>
             <span className="text-xl font-bold">Freelanceflow</span>
           </GradientText>
         </div>
-        <div className="flex items-center gap-8">
+
+        {/* Mobile Menu Button */}
+        <button
+          className="md:hidden"
+          onClick={() => setIsMenuOpen(!isMenuOpen)}
+        >
+          <Menu className="w-6 h-6 text-gray-400" />
+        </button>
+
+        {/* Desktop Navigation */}
+        <div className="hidden md:flex items-center gap-8">
           <a href="#" className="text-gray-400 hover:text-white transition-colors">Fonctionnalités</a>
           <a href="#" className="text-gray-400 hover:text-white transition-colors">À propos</a>
           <Button
@@ -35,37 +46,55 @@ export default function LandingPage() {
             Commencer
           </Button>
         </div>
+
+        {/* Mobile Menu */}
+        {isMenuOpen && (
+          <div className="absolute top-16 left-0 right-0 bg-gray-900 border-b border-gray-800 p-4 md:hidden">
+            <div className="flex flex-col gap-4">
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">Fonctionnalités</a>
+              <a href="#" className="text-gray-400 hover:text-white transition-colors">À propos</a>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={handleStartClick}
+                className="w-full"
+              >
+                Commencer
+              </Button>
+            </div>
+          </div>
+        )}
       </nav>
 
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-6 mt-20">
-        <div className="grid grid-cols-2 gap-12 items-center">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-12 sm:mt-20">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
           <div>
-            <h1 className="text-5xl font-bold leading-tight mb-6">
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold leading-tight mb-6">
               Gérez vos projets freelance avec{' '}
               <GradientText variant="accent">simplicité</GradientText>
             </h1>
-            <p className="text-xl text-gray-400 mb-8">
+            <p className="text-lg sm:text-xl text-gray-400 mb-8">
               Une plateforme intuitive pour gérer vos clients, projets et factures en toute simplicité.
               Concentrez-vous sur ce qui compte vraiment : votre travail.
             </p>
-            <div className="flex gap-4">
+            <div className="flex justify-center sm:justify-start">
               <Button
                 variant="primary"
                 onClick={handleStartClick}
+                className="w-full sm:w-auto"
               >
                 Commencer Gratuitement
                 <span className="text-xl group-hover:translate-x-1 transition-transform">→</span>
               </Button>
-              <Button variant="outline">Voir la Démo</Button>
             </div>
           </div>
-          <div className="relative">
+          <div className="relative mt-8 lg:mt-0">
             <div className="absolute -inset-1 bg-gradient-to-r from-primary-dark to-secondary rounded-2xl blur-2xl opacity-20"></div>
             <img
               src="https://images.unsplash.com/photo-1551288049-bebda4e38f71?auto=format&fit=crop&q=80"
               alt="Dashboard"
-              className="relative rounded-2xl shadow-2xl border border-gray-800"
+              className="relative rounded-2xl shadow-2xl border border-gray-800 w-full"
             />
             <div className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-gray-900/50 backdrop-blur-xl rounded-full border border-gray-800 shadow-[0_0_15px_rgba(0,0,0,0.3)]">
               <div className="w-2 h-2 bg-primary rounded-full"></div>
@@ -76,15 +105,15 @@ export default function LandingPage() {
       </div>
 
       {/* Features Section */}
-      <div className="bg-gray-900/50 py-24 relative">
+      <div className="bg-gray-900/50 py-16 sm:py-24 mt-16 sm:mt-24 relative">
         <div className="absolute inset-0 bg-gradient-to-b from-black to-transparent"></div>
-        <div className="max-w-7xl mx-auto px-6 relative">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold mb-4">Tout ce dont vous avez besoin</h2>
-            <p className="text-xl text-gray-400">Des outils puissants pour gérer votre activité freelance</p>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 relative">
+          <div className="text-center mb-12 sm:mb-16">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4">Tout ce dont vous avez besoin</h2>
+            <p className="text-lg sm:text-xl text-gray-400">Des outils puissants pour gérer votre activité freelance</p>
           </div>
 
-          <div className="grid grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             <FeatureCard
               icon={Zap}
               title="Simple et Rapide"
@@ -105,18 +134,18 @@ export default function LandingPage() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-b from-gray-900 to-black py-24 relative overflow-hidden">
+      <div className="bg-gradient-to-b from-gray-900 to-black py-16 sm:py-24 relative overflow-hidden">
         <div className="absolute inset-0 bg-grid-white/[0.02]"></div>
         <div className="absolute -inset-px bg-gradient-to-r from-primary/20 to-secondary/20 blur-3xl opacity-30"></div>
-        <div className="max-w-3xl mx-auto px-6 text-center relative">
-          <h2 className="text-3xl font-bold text-white mb-4">Prêt à commencer ?</h2>
-          <p className="text-xl text-gray-400 mb-8">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center relative">
+          <h2 className="text-2xl sm:text-3xl font-bold text-white mb-4">Prêt à commencer ?</h2>
+          <p className="text-lg sm:text-xl text-gray-400 mb-8">
             Rejoignez la communauté des freelances qui gèrent leur activité efficacement
           </p>
           <Button
             variant="primary"
             size="lg"
-            className="mx-auto"
+            className="w-full sm:w-auto mx-auto"
             onClick={handleStartClick}
           >
             Commencer Maintenant

@@ -1,13 +1,14 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 
 // GET /api/projects/[id] - Détail d'un projet
 export async function GET(
-    req: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const headersList = await headers();
         const userId = headersList.get("x-user-id");
 
@@ -17,7 +18,7 @@ export async function GET(
 
         const project = await prisma.project.findUnique({
             where: {
-                id: params.id,
+                id,
                 userId
             },
             include: {
@@ -40,11 +41,13 @@ export async function GET(
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
 }
+
 export async function PUT(
-    req: Request,
-    context: { params: { id: string } }
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const headersList = await headers();
         const userId = headersList.get("x-user-id");
 
@@ -52,11 +55,11 @@ export async function PUT(
             return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
         }
 
-        const { title, description, clientId, startDate, endDate, status } = await req.json();
+        const { title, description, clientId, startDate, endDate, status } = await request.json();
 
         const project = await prisma.project.update({
             where: {
-                id: context.params.id,
+                id,
                 userId
             },
             data: {
@@ -84,12 +87,14 @@ export async function PUT(
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
 }
+
 // DELETE /api/projects/[id] - Supprimer un projet
 export async function DELETE(
-    req: Request,
-    { params }: { params: { id: string } }
+    request: NextRequest,
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
+        const { id } = await params;
         const headersList = await headers();
         const userId = headersList.get("x-user-id");
 
@@ -99,7 +104,7 @@ export async function DELETE(
 
         await prisma.project.delete({
             where: {
-                id: params.id,
+                id,
                 userId
             }
         });

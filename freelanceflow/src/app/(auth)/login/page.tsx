@@ -121,6 +121,15 @@ export default function LoginPage() {
                                         placeholder="••••••••"
                                     />
                                 </div>
+                                {/* Ajoutez ce bloc */}
+                                <div className="flex items-center justify-end mt-2">
+                                    <Link
+                                        href="/forgot-password"
+                                        className="text-sm font-medium text-[#FF4405] hover:text-[#FF5D26] transition-colors duration-200"
+                                    >
+                                        Mot de passe oublié ?
+                                    </Link>
+                                </div>
                             </div>
 
                             <Button

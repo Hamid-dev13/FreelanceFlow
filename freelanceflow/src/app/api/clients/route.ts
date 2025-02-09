@@ -42,10 +42,14 @@ export async function GET() {
 // POST /api/clients - Création d'un client
 export async function POST(req: Request) {
     try {
+        // Récupération des en-têtes
         const headersList = await headers();
         const userId = headersList.get("x-user-id");
 
+        console.log("User ID:", userId);  // Log pour vérifier la valeur de x-user-id
+
         if (!userId) {
+            console.log("User ID manquant, accès non autorisé.");  // Log pour voir pourquoi l'accès est refusé
             return NextResponse.json(
                 { error: "Non autorisé" },
                 { status: 401, headers: CORS_HEADERS }
@@ -91,6 +95,7 @@ export async function POST(req: Request) {
 
         return NextResponse.json(client, { status: 201, headers: CORS_HEADERS });
     } catch (error) {
+        console.error("Erreur lors de la création du client:", error);  // Log pour afficher l'erreur
         return NextResponse.json(
             { error: "Erreur lors de la création du client" },
             { status: 500, headers: CORS_HEADERS }

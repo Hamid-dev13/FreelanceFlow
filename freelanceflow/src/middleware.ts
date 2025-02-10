@@ -43,8 +43,30 @@ export async function middleware(request: NextRequest) {
     requestHeaders.set('x-user-id', payload.userId)
     requestHeaders.set('x-user-email', payload.email)
 
+    // Ajout du rôle dans les headers
+    requestHeaders.set('x-user-role', payload.role) // Nouvelle ligne pour le rôle
+
     // Log des nouveaux headers
     console.log("Nouveaux headers:", requestHeaders);
+
+    // Routes spécifiques aux rôles (nouvelle section)
+    const path = request.nextUrl.pathname
+    const userRole = payload.role
+
+    // Ajout de validation des routes par rôle
+    if (path.startsWith('/api/chef-de-projet') && userRole !== 'CHEF_PROJET') {
+        return NextResponse.json(
+            { error: 'Accès non autorisé' },
+            { status: 403 }
+        )
+    }
+
+    if (path.startsWith('/api/freelance') && userRole !== 'FREELANCE') {
+        return NextResponse.json(
+            { error: 'Accès non autorisé' },
+            { status: 403 }
+        )
+    }
 
     // Passer à l'étape suivante
     return NextResponse.next({

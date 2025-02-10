@@ -9,15 +9,14 @@ import '../styles/theme.css';
 import { Button } from '../Stylecomponents/Button';
 import { GradientText } from '@/app/Stylecomponents/GradientText';
 
-
-
 export default function SignUpPage() {
     const router = useRouter();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
         password: '',
-        confirmPassword: ''
+        confirmPassword: '',
+        role: 'FREELANCE' // Nouveau champ de rôle
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -27,7 +26,7 @@ export default function SignUpPage() {
         errors: [] as string[]
     });
     // Modifions handleChange
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
@@ -60,6 +59,8 @@ export default function SignUpPage() {
     }
 
     const handleSubmit = async (e: React.FormEvent) => {
+        console.log("Envoi du formulaire avec rôle:", formData.role);
+
         e.preventDefault();
         setLoading(true);
         setError("");
@@ -85,7 +86,8 @@ export default function SignUpPage() {
                 body: JSON.stringify({
                     name: formData.name,
                     email: formData.email,
-                    password: formData.password
+                    password: formData.password,
+                    role: formData.role // Ajout du rôle
                 }),
             });
 
@@ -177,6 +179,25 @@ export default function SignUpPage() {
                                         className="appearance-none block w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg shadow-sm placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-[#FF4405] focus:border-[#FF4405] transition-all duration-200"
                                         placeholder="vous@exemple.com"
                                     />
+                                </div>
+                            </div>
+
+                            {/* Nouveau champ de rôle */}
+                            <div>
+                                <label htmlFor="role" className="block text-sm font-medium text-gray-300">
+                                    Rôle
+                                </label>
+                                <div className="mt-1">
+                                    <select
+                                        id="role"
+                                        name="role"
+                                        value={formData.role}
+                                        onChange={handleChange}
+                                        className="appearance-none block w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg shadow-sm text-white focus:outline-none focus:ring-2 focus:ring-[#FF4405] focus:border-[#FF4405] transition-all duration-200"
+                                    >
+                                        <option value="FREELANCE">Développeur Freelance</option>
+                                        <option value="CHEF_PROJET">Chef de Projet</option>
+                                    </select>
                                 </div>
                             </div>
 

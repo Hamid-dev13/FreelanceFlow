@@ -8,18 +8,21 @@ import { signJWT } from "@/lib/auth/jwt";
 
 export async function POST(req: Request) {
     try {
+
         console.log("🔹 Requête reçue pour inscription");
         console.log('🔍 Diagnostic des dépendances :', {
             bcryptjsVersion: require('bcryptjs/package.json').version,
             prismaVersion: require('@prisma/client/package.json').version,
             nodeVersion: process.version
-        })
+        });
         console.log('🔍 Variables environnement :', {
             DATABASE_URL: process.env.DATABASE_URL ? '✅ Présent' : '❌ Manquant',
             JWT_SECRET: process.env.JWT_SECRET ? '✅ Présent' : '❌ Manquant'
         });
-        const { email, password, name } = await req.json();
-        console.log("🔹 Données reçues :", { email, password: "********", name });
+
+        console.log("🔹 Requête reçue pour inscription");
+        const { email, password, name, role } = await req.json();
+        console.log("🔹 Données reçues :", { email, password: "********", name, role });
 
         // Ajoutons la validation du mot de passe après la validation basique :
         if (!email || !password || !name) {
@@ -68,13 +71,18 @@ export async function POST(req: Request) {
                 email,
                 password: hashedPassword,
                 name,
+                role
             },
         });
         console.log("✅ Utilisateur créé avec succès :", user);
 
         // Générer le token
         console.log("🔹 Génération du token JWT...");
-        const token = await signJWT({ userId: user.id, email: user.email });
+        const token = await signJWT({
+            userId: user.id,
+            email: user.email,
+            role: user.role  // Assurez-vous d'inclure le rôle
+        })
         console.log("✅ Token généré :", token);
 
         return NextResponse.json({ token }, { status: 201 });

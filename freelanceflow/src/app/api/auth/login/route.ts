@@ -16,12 +16,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Identifiants incorrects" }, { status: 401 });
         }
 
-        // Générer le JWT avec jose (async)
+        // Dans votre route de login
         const token = await signJWT({
             userId: user.id,
-            email: user.email
-        });
-
+            email: user.email,
+            role: user.role  // Ajoutez cette ligne
+        })
         return NextResponse.json({ token });
     } catch (error) {
         console.error("Erreur login:", error);

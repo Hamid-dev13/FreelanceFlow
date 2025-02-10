@@ -21,13 +21,25 @@ export async function POST(req: Request) {
         const { email, password, name } = await req.json();
         console.log("🔹 Données reçues :", { email, password: "********", name });
 
-        // Validation basique
+        // Ajoutons la validation du mot de passe après la validation basique :
         if (!email || !password || !name) {
             console.warn("⚠️ Champs manquants");
             return NextResponse.json(
                 { error: "Missing required fields" },
                 { status: 400 }
             );
+        }
+        const errors = [];
+        if (password.length < 8) errors.push("Au moins 8 caractères");
+        if (!/[A-Z]/.test(password)) errors.push("Au moins une majuscule");
+        if (!/[0-9]/.test(password)) errors.push("Au moins un chiffre");
+        if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) errors.push("Au moins un caractère spécial");
+
+        if (errors.length > 0) {
+            console.warn("⚠️ Mot de passe invalide:", errors);
+            return NextResponse.json({
+                error: "Mot de passe invalide: " + errors.join(", ")
+            }, { status: 400 });
         }
 
         // Vérifier si l'utilisateur existe

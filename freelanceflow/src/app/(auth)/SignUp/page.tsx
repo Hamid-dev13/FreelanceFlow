@@ -21,19 +21,54 @@ export default function SignUpPage() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
-
+    // Ajoutons d'abord la validation et l'indicateur de force
+    const [passwordStrength, setPasswordStrength] = useState({
+        score: 0,
+        errors: [] as string[]
+    });
+    // Modifions handleChange
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
         }));
+
+        if (name === 'password') {
+            setPasswordStrength(validatePassword(value));
+        }
     };
+
+    // Fonction de validation
+    function validatePassword(password: string) {
+        const errors: string[] = [];
+        let score = 0;
+
+        if (password.length >= 8) score++;
+        else errors.push("Au moins 8 caractères");
+
+        if (/[A-Z]/.test(password)) score++;
+        else errors.push("Au moins une majuscule");
+
+        if (/[0-9]/.test(password)) score++;
+        else errors.push("Au moins un chiffre");
+
+        if (/[!@#$%^&*(),.?":{}|<>]/.test(password)) score++;
+        else errors.push("Au moins un caractère spécial");
+
+        return { score, errors };
+    }
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError("");
+        // Ajout de cette vérification
+        if (passwordStrength.score < 4) {
+            setError("Le mot de passe doit respecter tous les critères de sécurité");
+            setLoading(false);
+            return;
+        }
 
         if (formData.password !== formData.confirmPassword) {
             setError("Les mots de passe ne correspondent pas");
@@ -161,6 +196,31 @@ export default function SignUpPage() {
                                         className="appearance-none block w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg shadow-sm placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-[#FF4405] focus:border-[#FF4405] transition-all duration-200"
                                         placeholder="••••••••"
                                     />
+                                    {formData.password && (
+                                        <div className="mt-2 space-y-2">
+                                            <div className="flex gap-1">
+                                                {[...Array(4)].map((_, i) => (
+                                                    <div
+                                                        key={i}
+                                                        className={`h-1 flex-1 rounded-full ${i < passwordStrength.score
+                                                            ? 'bg-[#FF4405]'
+                                                            : 'bg-gray-700'
+                                                            }`}
+                                                    />
+                                                ))}
+                                            </div>
+                                            {passwordStrength.errors.length > 0 && (
+                                                <ul className="text-sm text-gray-400 space-y-1">
+                                                    {passwordStrength.errors.map((error, i) => (
+                                                        <li key={i} className="flex items-center gap-1">
+                                                            <span className="h-1 w-1 rounded-full bg-gray-500" />
+                                                            {error}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -180,9 +240,13 @@ export default function SignUpPage() {
                                         className="appearance-none block w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg shadow-sm placeholder-gray-500 text-white focus:outline-none focus:ring-2 focus:ring-[#FF4405] focus:border-[#FF4405] transition-all duration-200"
                                         placeholder="••••••••"
                                     />
+                                    {formData.confirmPassword && formData.password !== formData.confirmPassword && (
+                                        <p className="mt-1 text-sm text-[#FF4405]">
+                                            Les mots de passe ne correspondent pas
+                                        </p>
+                                    )}
                                 </div>
                             </div>
-
                             <Button
                                 type="submit"
                                 disabled={loading}

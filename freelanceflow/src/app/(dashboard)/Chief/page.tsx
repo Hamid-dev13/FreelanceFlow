@@ -55,35 +55,37 @@ export default function ChefDeProjetDashboard() {
     })
     const [selectedMission, setSelectedMission] = useState<Mission | null>(null)
 
-    useEffect(() => {
-        const fetchDashboardData = async () => {
-            try {
-                // Récupérer les projets
-                const projectsResponse = await fetch('/api/projects')
-                const projectsData = await projectsResponse.json()
-                setProjects(projectsData)
-
-                // Récupérer les missions
-                const missionsResponse = await fetch('/api/missions')
-                const missionsData = await missionsResponse.json()
-                setMissions(missionsData)
-
-                // Récupérer les freelances
-                const freelancesResponse = await fetch('/api/users?role=FREELANCE')
-                const freelancesData = await freelancesResponse.json()
-                setFreelances(freelancesData)
-
-                // Récupérer les statistiques du dashboard
-                const statsResponse = await fetch('/api/dashboard/chef-projet')
-                const statsData = await statsResponse.json()
-                setStats(statsData)
-            } catch (error) {
-                console.error('Erreur de chargement des données:', error)
-            }
-        }
-
-        fetchDashboardData()
-    }, [])
+    /*
+ useEffect(() => {
+     const fetchDashboardData = async () => {
+         try {
+             // Récupérer les projets
+             const projectsResponse = await fetch('/api/projects')
+             const projectsData = await projectsResponse.json()
+             setProjects(projectsData)
+ 
+             // Récupérer les missions
+             const missionsResponse = await fetch('/api/missions')
+             const missionsData = await missionsResponse.json()
+             setMissions(missionsData)
+ 
+             // Récupérer les freelances
+             const freelancesResponse = await fetch('/api/users?role=FREELANCE')
+             const freelancesData = await freelancesResponse.json()
+             setFreelances(freelancesData)
+ 
+             // Récupérer les statistiques du dashboard
+             const statsResponse = await fetch('/api/dashboard/chef-projet')
+             const statsData = await statsResponse.json()
+             setStats(statsData)
+         } catch (error) {
+             console.error('Erreur de chargement des données:', error)
+         }
+     }
+ 
+     fetchDashboardData()
+ }, [])
+ */
 
     const handleAssignMission = async (missionId: string, freelanceId: string) => {
         try {

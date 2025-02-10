@@ -8,11 +8,13 @@ import Image from 'next/image';
 import '../styles/theme.css';
 import { Button } from '../Stylecomponents/Button';
 import { GradientText } from '../Stylecomponents/GradientText';
+import { jwtDecode } from "jwt-decode";
 
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [role, setRole] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
 
@@ -20,7 +22,6 @@ export default function LoginPage() {
         e.preventDefault();
         setLoading(true);
         setError("");
-
         try {
             const res = await fetch("/api/auth/login", {
                 method: "POST",
@@ -34,7 +35,15 @@ export default function LoginPage() {
 
             if (res.ok) {
                 localStorage.setItem("token", data.token);
-                router.push("/dashboard");
+                // Décoder le token pour obtenir le rôle
+                const decoded = jwtDecode(data.token) as { role: string };
+
+                // Rediriger selon le rôle
+                if (decoded.role === 'CHEF_PROJET') {
+                    router.push('/chef-de-projet');
+                } else {
+                    router.push('/freelance');
+                }
             } else {
                 setError(data.error || "Erreur de connexion");
             }

@@ -18,7 +18,7 @@ export async function POST(req: Request) {
             DATABASE_URL: process.env.DATABASE_URL ? '✅ Présent' : '❌ Manquant',
             JWT_SECRET: process.env.JWT_SECRET ? '✅ Présent' : '❌ Manquant'
         });
-        const { email, password, name } = await req.json();
+        const { email, password, name, role } = await req.json();
         console.log("🔹 Données reçues :", { email, password: "********", name });
 
         // Ajoutons la validation du mot de passe après la validation basique :
@@ -44,6 +44,13 @@ export async function POST(req: Request) {
 
         // Vérifier si l'utilisateur existe
         console.log("🔹 Vérification de l'existence de l'utilisateur...");
+        // Après les vérifications du mot de passe
+        if (role && !['DEVELOPER', 'PROJECT_MANAGER'].includes(role)) {
+            return NextResponse.json(
+                { error: "Invalid role" },
+                { status: 400 }
+            );
+        }
         const existingUser = await prisma.user.findUnique({
             where: { email }
         });
@@ -68,13 +75,14 @@ export async function POST(req: Request) {
                 email,
                 password: hashedPassword,
                 name,
+                role: role || 'DEVELOPER',
             },
         });
         console.log("✅ Utilisateur créé avec succès :", user);
 
         // Générer le token
         console.log("🔹 Génération du token JWT...");
-        const token = await signJWT({ userId: user.id, email: user.email });
+        const token = await signJWT({ userId: user.id, email: user.email, role: role });
         console.log("✅ Token généré :", token);
 
         return NextResponse.json({ token }, { status: 201 });

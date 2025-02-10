@@ -1,8 +1,14 @@
-// src/app/api/auth/login/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
 import { signJWT } from "@/lib/auth/jwt";
+
+interface JWTPayload {
+    userId: string;
+    email: string;
+    role: 'DEVELOPER' | 'PROJECT_MANAGER';
+
+}
 
 export async function POST(req: Request) {
     try {
@@ -16,13 +22,18 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Identifiants incorrects" }, { status: 401 });
         }
 
-        // Générer le JWT avec jose (async)
+        // Générer le token JWT avec role
         const token = await signJWT({
             userId: user.id,
-            email: user.email
+            email: user.email,
+            role: user.role
+
         });
 
-        return NextResponse.json({ token });
+        return NextResponse.json({
+            token,
+            role: user.role
+        });
     } catch (error) {
         console.error("Erreur login:", error);
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

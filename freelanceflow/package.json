@@ -19,6 +19,7 @@
     "html-pdf-node": "^1.0.8",
     "jose": "^5.9.6",
     "jsonwebtoken": "^9.0.2",
+    "jwt-decode": "^4.0.0",
     "libphonenumber-js": "^1.11.19",
     "lodash": "^4.17.21",
     "lucide-react": "^0.475.0",

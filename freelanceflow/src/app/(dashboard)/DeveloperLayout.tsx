@@ -1,6 +1,4 @@
-import React from 'react';
-
-export const DeveloperLayout = ({ children }: { children: React.ReactNode }) => {
+export const DeveloperLayout = () => {
     return (
         <div>
             <header>
@@ -10,11 +8,14 @@ export const DeveloperLayout = ({ children }: { children: React.ReactNode }) => 
                         <li>Mes tâches</li>
                         <li>Suivi des bugs</li>
                         <li>Codebase</li>
-                        {/* Ajoute d'autres liens spécifiques au développeur */}
                     </ul>
                 </nav>
             </header>
-
+            <main>
+                {/* Contenu spécifique au Developer */}
+                <h1>Dashboard Développeur</h1>
+                {/* Liste des tâches assignées, projets en cours, etc */}
+            </main>
         </div>
     );
 };

@@ -1,23 +1,39 @@
-// prisma/schema.prisma
 generator client {
   provider = "prisma-client-js"
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")  // Ajouter cette ligne
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
+
+// Énumération des rôles
+enum Role {
+  DEVELOPER
+  PROJECT_MANAGER
+}
+
+// Énumération des statuts de mission
+enum MissionStatus {
+  PENDING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
 model User {
   id        String    @id @default(uuid())
   email     String    @unique
   password  String
-    role      Role      @default(DEVELOPER)  // Nouveau champ
+  role      Role      @default(DEVELOPER)
   name      String
   clients   Client[]
   projects  Project[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  missions  Mission[] @relation("AssignedMissions")
+  createdMissions Mission[] @relation("CreatedMissions")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Client {
@@ -28,15 +44,10 @@ model Client {
   user      User      @relation(fields: [userId], references: [id])
   userId    String
   projects  Project[]
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
-// Nouveau type énuméré pour les rôles
-enum Role {
-  DEVELOPER
-  PROJECT_MANAGER
-}
 model Project {
   id          String    @id @default(uuid())
   title       String
@@ -48,6 +59,31 @@ model Project {
   clientId    String
   user        User      @relation(fields: [userId], references: [id])
   userId      String
+  missions    Mission[]
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
+}
+
+model Mission {
+  id          String        @id @default(uuid())
+  title       String
+  description String?       @db.Text
+  status      MissionStatus @default(PENDING)
+  deadline    DateTime
+  
+  // Relation avec le projet
+  project     Project?      @relation(fields: [projectId], references: [id])
+  projectId   String?
+
+  // Relation avec le développeur assigné
+  assignedTo  User          @relation("AssignedMissions", fields: [assignedToId], references: [id])
+  assignedToId String
+
+  // Relation avec le créateur de la mission (chef de projet)
+  createdBy   User          @relation("CreatedMissions", fields: [createdById], references: [id])
+  createdById String
+
+  // Métadonnées
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
 }

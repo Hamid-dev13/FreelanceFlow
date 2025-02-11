@@ -6,8 +6,7 @@ import { useRouter } from "next/navigation";
 import { ProjectManagerLayout } from '@/app/(dashboard)/ProjectManagerLayout';
 import { DeveloperLayout } from '@/app/(dashboard)/DeveloperLayout';
 import { Layout } from "lucide-react";
-
-type UserRole = 'CHEF_PROJET' | 'FREELANCE';
+type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
 
 export default function DashboardLayout({
     children,
@@ -49,10 +48,9 @@ export default function DashboardLayout({
             </div>
         );
     }
-
-    return role === 'CHEF_PROJET' ? (
-        <ProjectManagerLayout>{children}</ProjectManagerLayout>
+    return role === 'PROJECT_MANAGER' ? (
+        <ProjectManagerLayout /> // Sans {children}
     ) : (
-        <DeveloperLayout>{children}</DeveloperLayout>
+        <DeveloperLayout />     // Sans {children}
     );
 }

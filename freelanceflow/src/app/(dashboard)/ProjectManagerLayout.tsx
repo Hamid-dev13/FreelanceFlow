@@ -1,6 +1,6 @@
 import React from 'react';
 
-export const ProjectManagerLayout = ({ children }: { children: React.ReactNode }) => {
+export const ProjectManagerLayout = () => {  // Plus besoin du props children
     return (
         <div>
             <header>
@@ -10,13 +10,15 @@ export const ProjectManagerLayout = ({ children }: { children: React.ReactNode }
                         <li>Gestion des projets</li>
                         <li>Équipes</li>
                         <li>Rapports</li>
-                        {/* Ajoute d'autres liens spécifiques au chef de projet */}
                     </ul>
                 </nav>
             </header>
             <main>
-                {children} {/* Affiche le contenu de la page */}
+                {/* Contenu spécifique au ProjectManager */}
+                <h1>Dashboard Chef de Projet</h1>
+                {/* ... */}
             </main>
         </div>
     );
 };
+

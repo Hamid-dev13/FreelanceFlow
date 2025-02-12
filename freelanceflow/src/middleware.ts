@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { verifyJWT } from '@/lib/auth/jwt'
+import { verifyJWT } from '@/features/auth/services/jwt'
 
 export async function middleware(request: NextRequest) {
     // Vérifie si l'URL commence par /api/auth/

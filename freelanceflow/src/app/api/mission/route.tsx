@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
-import { verifyJWT } from "@/lib/auth/jwt"
+import { verifyJWT } from '@/features/auth/services/jwt';
 export async function GET(request: NextRequest) {
     // Token verification
     const token = request.headers.get('authorization')?.split('Bearer ')[1]

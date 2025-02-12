@@ -2,10 +2,10 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import { Zap, Shield, CheckCircle, Menu } from 'lucide-react';
-import { Button } from './Stylecomponents/Button';
-import { FeatureCard } from './Stylecomponents/FeatureCard';
-import { GradientText } from './Stylecomponents/GradientText';
-import './styles/theme.css';
+import { Button } from '@/components/common/ui/Button';
+import { FeatureCard } from '@/components/common/ui/FeatureCard';
+import { GradientText } from '@/components/common/ui/GradientText';
+import '@/styles/theme.css';
 
 export default function LandingPage() {
   const router = useRouter();

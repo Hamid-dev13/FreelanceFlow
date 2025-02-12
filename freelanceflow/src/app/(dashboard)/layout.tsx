@@ -3,8 +3,8 @@
 import { jwtDecode } from "jwt-decode";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ProjectManagerLayout } from '@/app/(dashboard)/ProjectManagerLayout';
-import { DeveloperLayout } from '@/app/(dashboard)/DeveloperLayout';
+import { ProjectManagerLayout } from '@/app/(dashboard)/_components';
+import { DeveloperLayout } from '@/app/(dashboard)/_components/';
 import { Layout } from "lucide-react";
 type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
 

@@ -4,7 +4,7 @@ console.log("Signup route loaded");
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { signJWT } from "@/lib/auth/jwt";
+import { signJWT } from "@/features/auth/services/jwt";
 
 export async function POST(req: Request) {
     try {

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { createMission } from '@/services/missionService';
+import { createMission } from '@/features/missions/services/missionService';
 
 interface Developer {
     id: string;

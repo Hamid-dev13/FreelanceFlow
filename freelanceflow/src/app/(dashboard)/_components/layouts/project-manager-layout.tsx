@@ -1,7 +1,7 @@
-"useclient"
+
 import React from 'react';
 import { LayoutDashboard, FolderKanban, Plus, BarChart2, Layout } from 'lucide-react';
-import AddMissionButton from '../components/mission/AddMissionButton';
+import AddMissionButton from '@/components/features/mission/AddMissionButton';
 
 export const ProjectManagerLayout = () => {
     return (

@@ -1,5 +1,5 @@
+// src/features/auth/services/jwt.ts
 import * as jose from 'jose'
-
 
 export interface JWTPayload extends jose.JWTPayload {
     userId: string;
@@ -54,7 +54,8 @@ export async function verifyJWT(token: string): Promise<JWTPayload> {
         return {
             userId: payload.userId as string,
             email: payload.email as string,
-            role: payload.role as 'DEVELOPER' | 'PROJECT_MANAGER'
+            role: payload.role as 'DEVELOPER' | 'PROJECT_MANAGER',
+            ...payload  // Inclure les autres propriétés du payload
         }
     } catch (error) {
         console.error('🚨 Erreur complète de vérification:', error)
@@ -71,10 +72,15 @@ export async function verifyJWT(token: string): Promise<JWTPayload> {
 }
 
 export async function signJWT(payload: JWTPayload) {
-    const jwt = await new jose.SignJWT(payload)
-        .setProtectedHeader({ alg: 'HS256' })
-        .setExpirationTime('24h')
-        .sign(JWT_SECRET);
+    try {
+        const jwt = await new jose.SignJWT(payload)
+            .setProtectedHeader({ alg: 'HS256' })
+            .setExpirationTime('24h')
+            .sign(JWT_SECRET);
 
-    return jwt;
+        return jwt;
+    } catch (error) {
+        console.error('🚨 Erreur lors de la signature du JWT:', error);
+        throw error;
+    }
 }

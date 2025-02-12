@@ -5,9 +5,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogIn, UserPlus, Loader2, ArrowLeft, Zap } from 'lucide-react';
 import Image from 'next/image';
-import '../styles/theme.css';
-import { Button } from '../../components/ui/Button';
-import { GradientText } from '../Stylecomponents/GradientText';
+import "@/styles/theme.css";
+import { Button } from '@/components/common/ui/Button';
+import { GradientText } from '@/components/common/ui/GradientText';
 import { jwtDecode } from "jwt-decode";
 
 export default function LoginPage() {

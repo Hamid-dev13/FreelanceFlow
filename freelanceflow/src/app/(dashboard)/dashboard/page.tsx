@@ -110,10 +110,10 @@ export default function DashboardPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
+        <div className="min-h-screen bg-gradient-to-b from-black to-gray-900 text-white relative z-0">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 space-y-6 sm:space-y-8">
                 {/* Header Section with Logo */}
-                <div className="flex flex-col sm:flex-row items-center sm:justify-between bg-gray-900/50 backdrop-blur-lg rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-800 shadow-lg animate-fade-in">
+                <div className="flex flex-col sm:flex-row items-center sm:justify-between bg-gray-900/50 backdrop-blur-sm rounded-2xl p-4 sm:p-6 lg:p-8 border border-gray-800 shadow-lg animate-fade-in relative z-10">
                     <div className="text-center sm:text-left mb-4 sm:mb-0">
                         <div className="flex items-center justify-center sm:justify-start gap-3 mb-3">
                             <Layout className="h-6 w-6 sm:h-8 sm:w-8 text-[#FF4405]" />
@@ -129,14 +129,14 @@ export default function DashboardPage() {
                 </div>
 
                 {/* Stats Grid with Animations */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 relative z-10">
                     {[
                         { icon: Users, label: "Clients Totaux", value: stats.totalClients },
                         { icon: Briefcase, label: "Projets Actifs", value: stats.activeProjects },
                         { icon: CheckCircle, label: "Projets Terminés", value: stats.completedProjects },
                         { icon: TrendingUp, label: "Nouveaux Projets (ce mois)", value: stats.totalProjectsThisMonth }
                     ].map(({ icon: Icon, label, value }) => (
-                        <div key={label} className="group bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-4 sm:p-6 shadow-lg hover:border-[#FF4405]/50 transition-all duration-300 hover:scale-[1.02]">
+                        <div key={label} className="group bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800 p-4 sm:p-6 shadow-lg hover:border-[#FF4405]/50 transition-all duration-300 hover:scale-[1.02]">
                             <div className="flex items-center gap-3 sm:gap-4">
                                 <Icon className="h-6 w-6 sm:h-8 sm:w-8 text-[#FF4405] group-hover:rotate-12 transition-transform duration-300" />
                                 <div>
@@ -148,9 +148,9 @@ export default function DashboardPage() {
                     ))}
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 relative z-10">
                     {/* Upcoming Projects */}
-                    <div className="bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-4 sm:p-6 shadow-lg">
+                    <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800 p-4 sm:p-6 shadow-lg">
                         <div className="flex items-center gap-3 mb-4 sm:mb-6">
                             <Calendar className="h-5 w-5 sm:h-6 sm:w-6 text-[#FF4405]" />
                             <h3 className="text-lg sm:text-xl font-semibold">Échéances à venir</h3>
@@ -186,7 +186,7 @@ export default function DashboardPage() {
                     </div>
 
                     {/* Recent Activity */}
-                    <div className="bg-gray-900/50 backdrop-blur-lg rounded-xl border border-gray-800 p-4 sm:p-6 shadow-lg">
+                    <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl border border-gray-800 p-4 sm:p-6 shadow-lg">
                         <div className="flex items-center gap-3 mb-4 sm:mb-6">
                             <Activity className="h-5 w-5 sm:h-6 sm:w-6 text-[#FF4405]" />
                             <h3 className="text-lg sm:text-xl font-semibold">Activité Récente</h3>

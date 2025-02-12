@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button } from '../ui/Button';
+import { Plus } from 'lucide-react';
 import MissionForm from './MissionForm';
 
 interface AddMissionButtonProps {
@@ -18,24 +18,21 @@ const AddMissionButton: React.FC<AddMissionButtonProps> = ({ onMissionAdded }) =
     };
 
     const handleMissionSubmit = (missionData: any) => {
-        // Si un callback onMissionAdded est fourni, l'appeler
         if (onMissionAdded) {
             onMissionAdded(missionData);
         }
-
-        // Fermer le formulaire
         setShowMissionForm(false);
     };
 
     return (
         <>
-            <Button
+            <button
                 onClick={handleOpenMissionForm}
-                variant="primary"
-                size="md"
+                className="inline-flex items-center gap-2 px-4 py-2 bg-[#FF4405] text-white rounded-lg hover:bg-[#e63d04] transition-all duration-300 shadow-lg hover:shadow-[#FF4405]/20"
             >
-                Ajouter une mission
-            </Button>
+                <Plus className="h-4 w-4" />
+                <span>Nouvelle Mission</span>
+            </button>
 
             {showMissionForm && (
                 <MissionForm

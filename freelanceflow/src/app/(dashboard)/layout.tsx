@@ -49,8 +49,10 @@ export default function DashboardLayout({
         );
     }
     return role === 'PROJECT_MANAGER' ? (
-        <ProjectManagerLayout /> // Sans {children}
+        <ProjectManagerLayout>
+            {children} {/* S'assurer que children est toujours passé ici */}
+        </ProjectManagerLayout>
     ) : (
-        <DeveloperLayout />     // Sans {children}
+        <DeveloperLayout>{children}</DeveloperLayout>
     );
 }

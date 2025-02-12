@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 import { createMission } from '@/features/missions/services/missionService';
 
@@ -38,18 +39,18 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
                 assignedToId: assignedToId || null
             });
             onSubmit(newMission);
+            onClose();
         } catch (error) {
             console.error("Erreur lors de la création de la mission:", error);
         }
     };
 
-    // Empêcher la propagation du clic sur la modale
     const handleModalClick = (e: React.MouseEvent) => {
         e.stopPropagation();
     };
 
-    return (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-[9999]" onClick={onClose}>
+    const modal = (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center" onClick={onClose}>
             <div className="w-full max-w-lg bg-gray-900 rounded-xl border border-gray-800 shadow-xl" onClick={handleModalClick}>
                 <div className="flex items-center justify-between p-6 border-b border-gray-800">
                     <h2 className="text-xl font-semibold text-white">Nouvelle Mission</h2>
@@ -141,6 +142,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
             </div>
         </div>
     );
+
+    return createPortal(modal, document.body);
 };
 
 export default MissionForm;

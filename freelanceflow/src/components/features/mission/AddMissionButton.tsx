@@ -3,14 +3,16 @@ import { Plus } from 'lucide-react';
 import MissionForm from './MissionForm';
 
 interface AddMissionButtonProps {
-    onMissionAdded?: (mission: any) => void;
+    onMissionAdded?: (missionData: any) => void;
+    onClick?: () => void;  // Ajout de onClick comme prop optionnelle
 }
 
-const AddMissionButton: React.FC<AddMissionButtonProps> = ({ onMissionAdded }) => {
+const AddMissionButton: React.FC<AddMissionButtonProps> = ({ onMissionAdded, onClick }) => {
     const [showMissionForm, setShowMissionForm] = useState(false);
 
     const handleOpenMissionForm = () => {
         setShowMissionForm(true);
+        onClick?.();  // Appel de onClick s'il existe
     };
 
     const handleCloseMissionForm = () => {

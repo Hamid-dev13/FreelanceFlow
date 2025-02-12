@@ -6,7 +6,7 @@ import Link from "next/link";
 import { LogIn, Loader2, ArrowLeft, Zap } from 'lucide-react';
 import Image from 'next/image';
 import '../styles/theme.css';
-import { Button } from '../Stylecomponents/Button';
+import { Button } from '../../components/ui/Button';
 import { GradientText } from '@/app/Stylecomponents/GradientText';
 
 

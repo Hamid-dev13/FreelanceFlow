@@ -1,5 +1,5 @@
 import React from 'react';
-
+import AddMissionButton from '../components/mission/AddMissionButton';
 export const ProjectManagerLayout = () => {  // Plus besoin du props children
     return (
         <div>
@@ -8,8 +8,7 @@ export const ProjectManagerLayout = () => {  // Plus besoin du props children
                     <ul>
                         <li>Dashboard</li>
                         <li>Gestion des projets</li>
-                        <li>Équipes</li>
-                        <li>Rapports</li>
+                        <AddMissionButton onClick={() => console.log('Bouton cliqué')} />
                     </ul>
                 </nav>
             </header>

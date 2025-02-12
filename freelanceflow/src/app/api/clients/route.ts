@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
 
@@ -18,11 +18,9 @@ export async function OPTIONS() {
     });
 }
 
-// GET /api/clients - Liste des clients
-export async function GET() {
+export async function GET(request: NextRequest) {
     try {
-        const headersList = await headers();
-        const userId = headersList.get("x-user-id");
+        const userId = request.headers.get('x-user-id')
 
         if (!userId) {
             return NextResponse.json({ error: "Non autorisé" }, { status: 401, headers: CORS_HEADERS });

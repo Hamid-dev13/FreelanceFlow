@@ -11,8 +11,7 @@ export async function middleware(request: NextRequest) {
     // Récupère le header Authorization
     const authHeader = request.headers.get('Authorization')
 
-    // Log de l'Authorization header
-    console.log("Authorization header:", authHeader);
+    console.log("🔍 Authorization header complet:", authHeader);
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return NextResponse.json(
@@ -21,37 +20,38 @@ export async function middleware(request: NextRequest) {
         )
     }
 
-    // Extraire le token du header
-    const token = authHeader.split(' ')[1]
-    console.log("Token extrait:", token);
+    // Extraire le token avec un espace
+    const token = authHeader.replace('Bearer ', '')
+    console.log("🔑 Token extrait:", token);
 
-    // Vérifier la validité du token
-    const payload = await verifyJWT(token)
+    try {
+        // Vérifier la validité du token
+        const payload = await verifyJWT(token)
 
-    // Log du payload après la vérification du token
-    console.log("Payload du token:", payload);
+        console.log("✅ Payload décodé:", payload);
 
-    if (!payload) {
+        // Ajouter les informations utilisateur dans les headers
+        const requestHeaders = new Headers(request.headers)
+        requestHeaders.set('x-user-id', payload.userId)
+        requestHeaders.set('x-user-email', payload.email)
+        requestHeaders.set('x-user-role', payload.role)
+
+        // Passer à l'étape suivante
+        return NextResponse.next({
+            request: {
+                headers: requestHeaders,
+            },
+        })
+    } catch (error) {
+        console.error("❌ Erreur de vérification du token:", error);
         return NextResponse.json(
-            { error: 'Token invalide' },
+            {
+                error: 'Token invalide',
+                details: error instanceof Error ? error.message : String(error)
+            },
             { status: 401 }
         )
     }
-
-    // Ajouter les informations utilisateur dans les headers
-    const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-user-id', payload.userId)
-    requestHeaders.set('x-user-email', payload.email)
-
-    // Log des nouveaux headers
-    console.log("Nouveaux headers:", requestHeaders);
-
-    // Passer à l'étape suivante
-    return NextResponse.next({
-        request: {
-            headers: requestHeaders,
-        },
-    })
 }
 
 export const config = {

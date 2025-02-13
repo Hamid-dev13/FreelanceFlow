@@ -10,6 +10,18 @@ interface Developer {
     role: 'DEVELOPER' | 'PROJECT_MANAGER';
 }
 
+interface Project {
+    id: string;
+    title: string;
+    description?: string;
+    status: string;
+    client: {
+        id: string;
+        name: string;
+        email: string;
+    };
+}
+
 interface MissionFormProps {
     onClose: () => void;
     onSubmit: (missionData: CreateMissionData) => void;
@@ -20,10 +32,15 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
     const [description, setDescription] = useState('');
     const [deadline, setDeadline] = useState('');
     const [assignedToId, setAssignedToId] = useState('');
+    const [projectId, setProjectId] = useState('');
     const [developers, setDevelopers] = useState<Developer[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [projectsLoading, setProjectsLoading] = useState(true);
+    const [projectsError, setProjectsError] = useState<string | null>(null);
 
+    // Effet pour charger les développeurs
     useEffect(() => {
         const fetchDevelopers = async () => {
             try {
@@ -61,6 +78,48 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
         fetchDevelopers();
     }, []);
 
+    // Effet pour charger les projets
+    useEffect(() => {
+        const fetchProjects = async () => {
+            try {
+                setProjectsLoading(true);
+                const token = localStorage.getItem('token');
+
+                if (!token) {
+                    throw new Error('Aucun token trouvé');
+                }
+
+                const response = await fetch('/api/projects', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Impossible de récupérer les projets');
+                }
+
+                const data: Project[] = await response.json();
+                setProjects(data);
+                setProjectsError(null);
+            } catch (err) {
+                console.error("Erreur de récupération des projets:", err);
+                setProjectsError(err instanceof Error ? err.message : 'Une erreur est survenue');
+                setProjects([]);
+            } finally {
+                setProjectsLoading(false);
+            }
+        };
+
+        fetchProjects();
+    }, []);
+
+    const handleModalClick = (e: React.MouseEvent) => {
+        e.stopPropagation();
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
@@ -68,7 +127,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
                 title,
                 description,
                 deadline,
-                assignedToId: assignedToId || undefined
+                assignedToId: assignedToId || null,
+                projectId: projectId || null
             };
 
             onSubmit(missionData);
@@ -76,10 +136,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
         } catch (error) {
             console.error("Erreur lors de la création de la mission:", error);
         }
-    };
-
-    const handleModalClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
     };
 
     const modal = (
@@ -140,6 +196,35 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
                     </div>
 
                     <div className="space-y-2">
+                        <label htmlFor="project" className="block text-sm font-medium text-gray-300">
+                            Projet associé
+                        </label>
+                        {projectsLoading ? (
+                            <div className="flex items-center justify-center py-4">
+                                <Loader2 className="h-6 w-6 animate-spin text-[#FF4405]" />
+                            </div>
+                        ) : projectsError ? (
+                            <div className="text-red-500 bg-red-500/10 p-3 rounded-lg">
+                                {projectsError}
+                            </div>
+                        ) : (
+                            <select
+                                id="project"
+                                value={projectId}
+                                onChange={(e) => setProjectId(e.target.value)}
+                                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-[#FF4405] focus:border-transparent text-white"
+                            >
+                                <option value="">Sélectionner un projet</option>
+                                {projects.map(project => (
+                                    <option key={project.id} value={project.id}>
+                                        {project.title} - {project.client.name}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
+                    </div>
+
+                    <div className="space-y-2">
                         <label htmlFor="developer" className="block text-sm font-medium text-gray-300">
                             Développeur assigné
                         </label>
@@ -187,7 +272,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
         </div>
     );
 
-    return createPortal(modal, document.body);
+    return typeof document !== 'undefined' ? createPortal(modal, document.body) : null;
 };
 
 export default MissionForm;

@@ -9,6 +9,7 @@ export type CreateMissionData = {
     description: string;
     deadline: string;
     assignedToId: string | null;
+    projectId: string | null;
 };
 
 export type Mission = {

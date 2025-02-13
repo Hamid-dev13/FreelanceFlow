@@ -112,13 +112,6 @@ export async function POST(request: NextRequest) {
     let decoded;
     try {
         decoded = await verifyJWT(token)
-        if (!decoded) {
-            return NextResponse.json(
-                { message: 'Token invalide' },
-                { status: 401 }
-            )
-        }
-
         if (decoded.role !== 'PROJECT_MANAGER') {
             return NextResponse.json(
                 { message: 'Seul un chef de projet peut créer une mission' },
@@ -151,20 +144,32 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Création de la mission
+        // Création de la mission - CORRECTION ICI
         const newMission = await prisma.mission.create({
             data: {
                 title: body.title,
-                description: body.description,
+                description: body.description || null,
                 deadline: new Date(body.deadline),
                 createdById: decoded.userId,
                 status: 'PENDING',
-                assignedToId: body.assignedToId || null,  // Optionnel
-                projectId: body.projectId || null         // Optionnel
+                assignedToId: body.assignedToId || null,
+                projectId: body.projectId || null
             },
             include: {
-                assignedTo: true,
-                createdBy: true,
+                assignedTo: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
+                createdBy: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
                 project: true
             }
         })

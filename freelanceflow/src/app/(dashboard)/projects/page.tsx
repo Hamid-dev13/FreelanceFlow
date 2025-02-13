@@ -13,9 +13,9 @@ import {
     AlertCircle,
     Loader2
 } from 'lucide-react';
-import AddProjectModal from "@/app/components/ui/AddProjectModal";
-import EditProjectModal from "@/app/components/ui/EditProjectModal";
-import DeleteProjectModal from "@/app/components/ui/DeleteProjectModal";
+import AddProjectModal from "@/components/features/ui/AddProjectModal";
+import EditProjectModal from "@/components/features/ui/EditProjectModal";
+import DeleteProjectModal from "@/components/features/ui/DeleteProjectModal";
 
 type Project = {
     id: string;

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
-import { createMission } from '@/features/missions/services/missionService';
+import { useMissionStore, type CreateMissionData } from '@/stores/useMissionStore';
 
 interface Developer {
     id: string;
@@ -10,14 +10,14 @@ interface Developer {
 
 interface MissionFormProps {
     onClose: () => void;
-    onSubmit: (missionData: any) => void;
+    onSubmit: (missionData: CreateMissionData) => void;
 }
 
 const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [deadline, setDeadline] = useState('');
-    const [assignedToId, setAssignedToId] = useState('');
+    const [assignedToId, setAssignedToId] = useState('');  // Changé de assignedTo à assignedToId
     const [developers, setDevelopers] = useState<Developer[]>([]);
 
     useEffect(() => {
@@ -32,13 +32,14 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         try {
-            const newMission = await createMission({
+            const missionData: CreateMissionData = {
                 title,
                 description,
                 deadline,
-                assignedToId: assignedToId || null
-            });
-            onSubmit(newMission);
+                assignedToId: assignedToId || undefined  // Utilisation du bon nom de propriété
+            };
+
+            onSubmit(missionData);
             onClose();
         } catch (error) {
             console.error("Erreur lors de la création de la mission:", error);
@@ -112,8 +113,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
                         </label>
                         <select
                             id="developer"
-                            value={assignedToId}
-                            onChange={(e) => setAssignedToId(e.target.value)}
+                            value={assignedToId}  // Changé de assignedTo à assignedToId
+                            onChange={(e) => setAssignedToId(e.target.value)}  // Changé ici aussi
                             className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-[#FF4405] focus:border-transparent text-white"
                         >
                             <option value="">Sélectionner un développeur</option>

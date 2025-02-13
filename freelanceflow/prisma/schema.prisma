@@ -50,6 +50,7 @@ model Client {
 
 model Project {
   id          String    @id @default(uuid())
+   name        String    // Ajoutez cette ligne
   title       String
   description String?   @db.Text
   startDate   DateTime  @default(now())
@@ -76,8 +77,8 @@ model Mission {
   projectId   String?
 
   // Relation avec le développeur assigné
-  assignedTo  User          @relation("AssignedMissions", fields: [assignedToId], references: [id])
-  assignedToId String
+  assignedTo  User?          @relation("AssignedMissions", fields: [assignedToId], references: [id])
+  assignedToId String?
 
   // Relation avec le créateur de la mission (chef de projet)
   createdBy   User          @relation("CreatedMissions", fields: [createdById], references: [id])

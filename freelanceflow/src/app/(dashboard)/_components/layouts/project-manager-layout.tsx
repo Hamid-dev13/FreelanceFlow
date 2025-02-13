@@ -1,6 +1,9 @@
+"use client";
+
 import React, { useState, type ReactNode } from 'react';
-import { LayoutDashboard, FolderKanban, Plus, BarChart2, Layout } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Plus, Layout } from 'lucide-react';
 import MissionForm from '@/components/features/mission/MissionForm';
+import { useMissionStore, type CreateMissionData } from '@/stores/useMissionStore';
 
 interface ProjectManagerLayoutProps {
     children: ReactNode;
@@ -8,6 +11,16 @@ interface ProjectManagerLayoutProps {
 
 export const ProjectManagerLayout = ({ children }: ProjectManagerLayoutProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const { createMission } = useMissionStore();
+
+    const handleMissionSubmit = async (data: CreateMissionData) => {
+        try {
+            await createMission(data);
+            setIsModalOpen(false);
+        } catch (error) {
+            console.error('Erreur lors de la création de la mission:', error);
+        }
+    };
 
     return (
         <div className="relative min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
@@ -25,13 +38,13 @@ export const ProjectManagerLayout = ({ children }: ProjectManagerLayoutProps) =>
                             {/* Navigation */}
                             <ul className="flex items-center space-x-8">
                                 <li>
-                                    <a href="#" className="flex items-center gap-2 text-gray-300 hover:text-[#FF4405] transition-colors">
+                                    <a href="/dashboard" className="flex items-center gap-2 text-gray-300 hover:text-[#FF4405] transition-colors">
                                         <LayoutDashboard className="h-5 w-5" />
                                         <span>Dashboard</span>
                                     </a>
                                 </li>
                                 <li>
-                                    <a href="#" className="flex items-center gap-2 text-gray-300 hover:text-[#FF4405] transition-colors">
+                                    <a href="/projects" className="flex items-center gap-2 text-gray-300 hover:text-[#FF4405] transition-colors">
                                         <FolderKanban className="h-5 w-5" />
                                         <span>Gestion des projets</span>
                                     </a>
@@ -59,10 +72,7 @@ export const ProjectManagerLayout = ({ children }: ProjectManagerLayoutProps) =>
             {isModalOpen && (
                 <MissionForm
                     onClose={() => setIsModalOpen(false)}
-                    onSubmit={(data) => {
-                        console.log('Nouvelle mission:', data);
-                        setIsModalOpen(false);
-                    }}
+                    onSubmit={handleMissionSubmit}
                 />
             )}
         </div>

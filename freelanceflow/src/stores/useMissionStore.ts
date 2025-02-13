@@ -1,8 +1,15 @@
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-
+import { createMission as createMissionService } from '@/features/missions/services/missionService';
 export type MissionStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 export type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
+
+export type CreateMissionData = {
+    title: string;
+    description: string;
+    deadline: string;
+    assignedToId: string | null;
+};
 
 export type Mission = {
     id: string;
@@ -36,12 +43,13 @@ interface MissionState {
     error: string | null;
     fetchMissions: (role: UserRole) => Promise<void>;
     updateMissionStatus: (id: string, status: MissionStatus) => Promise<void>;
+    startAutoRefresh: (role: UserRole) => () => void;
 }
 
 export const useMissionStore = create<MissionState>()(
     devtools(
         persist(
-            (set) => ({
+            (set, get) => ({
                 missions: [],
                 error: null,
 
@@ -53,6 +61,7 @@ export const useMissionStore = create<MissionState>()(
                         }
 
                         const response = await fetch('/api/mission', {
+                            method: 'GET',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
@@ -60,7 +69,8 @@ export const useMissionStore = create<MissionState>()(
                         });
 
                         if (!response.ok) {
-                            throw new Error('Impossible de récupérer les missions');
+                            const errorText = await response.text();
+                            throw new Error(`Impossible de récupérer les missions. Status: ${response.status}, Message: ${errorText}`);
                         }
 
                         const data: Mission[] = await response.json();
@@ -72,6 +82,30 @@ export const useMissionStore = create<MissionState>()(
                     }
                 },
 
+                startAutoRefresh: (role: UserRole) => {
+                    const interval = setInterval(() => {
+                        get().fetchMissions(role);
+                    }, 30000); // Toutes les 30 secondes
+
+                    // Retourne une fonction pour arrêter le refresh
+                    return () => clearInterval(interval);
+                },
+                createMission: async (data: CreateMissionData) => {
+                    try {
+                        // Utiliser le service existant
+                        const newMission = await createMissionService(data);
+
+                        // Mise à jour optimiste de la liste des missions
+                        set(state => ({
+                            missions: [newMission, ...state.missions]
+                        }));
+
+                        return newMission;
+                    } catch (error) {
+                        console.error('Erreur lors de la création de la mission:', error);
+                        throw error;
+                    }
+                },
                 updateMissionStatus: async (id: string, status: MissionStatus) => {
                     try {
                         const token = localStorage.getItem('token');

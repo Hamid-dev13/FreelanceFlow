@@ -148,12 +148,20 @@ const MissionCard = ({ mission, onStatusChange, updatingId }: MissionCardProps) 
 );
 
 function MissionsContent() {
-    const { missions, fetchMissions, updateMissionStatus } = useMissionStore();
+    const { missions, fetchMissions, updateMissionStatus, startAutoRefresh } = useMissionStore();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
 
     useEffect(() => {
+        // Fetch initial
         fetchMissions('DEVELOPER').catch(console.error);
-    }, [fetchMissions]);
+
+        // Démarre le refresh automatique
+        const stopRefresh = startAutoRefresh('DEVELOPER');
+
+        // Nettoie l'interval à la désactivation du composant
+        return () => stopRefresh();
+    }, [fetchMissions, startAutoRefresh]);
+
 
     const handleStatusChange = async (mission: Mission, newStatus: MissionStatus) => {
         if (updatingId || mission.status === newStatus) return;
@@ -167,6 +175,7 @@ function MissionsContent() {
             setUpdatingId(null);
         }
     };
+
 
     return (
         <div className="space-y-8">

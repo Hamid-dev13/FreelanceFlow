@@ -1,8 +1,7 @@
 "use client";
-
 import React from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, FolderKanban, Plus, Layout } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Plus, Layout, ClipboardList } from 'lucide-react';
 
 type ProjectManagerNavbarProps = {
     onNewMission: () => void;
@@ -44,12 +43,21 @@ export const ProjectManagerNavbar = ({ onNewMission, isModalOpen }: ProjectManag
                                 </Link>
                             </li>
                             <li>
+                                <Link
+                                    href="/mission/project-manager"
+                                    className="flex items-center gap-2 text-gray-300 hover:text-[#FF4405] transition-colors"
+                                >
+                                    <ClipboardList className="h-5 w-5" />
+                                    <span>Missions</span>
+                                </Link>
+                            </li>
+                            <li>
                                 <button
                                     onClick={onNewMission}
                                     className="flex items-center gap-2 bg-[#FF4405]/10 text-[#FF4405] px-4 py-2 rounded-lg hover:bg-[#FF4405]/20 transition-colors"
                                 >
                                     <Plus className="h-5 w-5" />
-                                    <span>Nouvelle mission</span>
+                                    <span>Nouvelle missions</span>
                                 </button>
                             </li>
                         </ul>

@@ -2,99 +2,63 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { Prisma } from '@prisma/client'
 import { verifyJWT } from '@/features/auth/services/jwt';
+
 export async function GET(request: NextRequest) {
-    // Token verification
-    const token = request.headers.get('authorization')?.split('Bearer ')[1]
+    const token = request.headers.get('authorization')?.split('Bearer ')[1];
 
     if (!token) {
         return NextResponse.json(
             { message: 'Token d\'authentification requis' },
             { status: 401 }
-        )
+        );
     }
 
-    let decoded;
     try {
-        decoded = await verifyJWT(token)
-        if (!decoded) {
-            return NextResponse.json(
-                { message: 'Token invalide' },
-                { status: 401 }
-            )
-        }
-    } catch (authError) {
-        return NextResponse.json(
-            { message: 'Token invalide', error: authError instanceof Error ? authError.message : String(authError) },
-            { status: 401 }
-        )
-    }
+        const decoded = await verifyJWT(token);
 
-    const { searchParams } = new URL(request.url)
-    const id = searchParams.get('id')
-    const developerId = searchParams.get('developerId')
-
-    try {
-        // If user is a DEVELOPER, they can only see their own missions
-        if (decoded.role === 'DEVELOPER') {
-            if (developerId && developerId !== decoded.userId) {
-                return NextResponse.json(
-                    { message: 'Accès non autorisé aux missions d\'autres développeurs' },
-                    { status: 403 }
-                )
-            }
-
-            const missions = await prisma.mission.findMany({
-                where: { assignedToId: decoded.userId },
-                include: {
-                    createdBy: true,
-                    project: true
-                }
-            })
-
-            return NextResponse.json(missions, { status: 200 })
-        }
-
-        // For PROJECT_MANAGER, they can access everything
-        if (id) {
-            const mission = await prisma.mission.findUnique({
-                where: { id },
-                include: {
-                    assignedTo: true,
-                    createdBy: true,
-                    project: true
-                }
-            })
-
-            return NextResponse.json(mission, { status: 200 })
-        }
-
-        if (developerId) {
-            const missions = await prisma.mission.findMany({
-                where: { assignedToId: developerId },
-                include: {
-                    createdBy: true,
-                    project: true
-                }
-            })
-
-            return NextResponse.json(missions, { status: 200 })
-        }
-
-        // All missions (for PROJECT_MANAGER only)
+        // Récupérer uniquement les missions assignées à l'utilisateur connecté
         const missions = await prisma.mission.findMany({
+            where: {
+                assignedToId: decoded.userId
+            },
             include: {
-                assignedTo: true,
-                createdBy: true,
-                project: true
-            }
-        })
+                assignedTo: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
+                createdBy: {
+                    select: {
+                        id: true,
+                        name: true,
+                        email: true
+                    }
+                },
+                project: {
+                    select: {
+                        id: true,
 
-        return NextResponse.json(missions, { status: 200 })
+                        status: true
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        return NextResponse.json(missions, { status: 200 });
     } catch (error) {
+        console.error('Erreur lors de la récupération des missions:', error);
         return NextResponse.json(
-            { message: 'Erreur lors de la récupération des missions', error },
+            {
+                message: 'Erreur lors de la récupération des missions',
+                error: error instanceof Error ? error.message : String(error)
+            },
             { status: 500 }
-        )
+        );
     }
 }
 
@@ -144,7 +108,15 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Création de la mission - CORRECTION ICI
+        // Vérifier si un développeur est assigné, sinon lever une erreur
+        if (!body.assignedToId) {
+            return NextResponse.json(
+                { message: 'Un développeur doit être assigné à la mission' },
+                { status: 400 }
+            )
+        }
+
+        // Création de la mission
         const newMission = await prisma.mission.create({
             data: {
                 title: body.title,
@@ -152,7 +124,7 @@ export async function POST(request: NextRequest) {
                 deadline: new Date(body.deadline),
                 createdById: decoded.userId,
                 status: 'PENDING',
-                assignedToId: body.assignedToId || null,
+                assignedToId: body.assignedToId,
                 projectId: body.projectId || null
             },
             include: {
@@ -221,7 +193,6 @@ export async function PUT(request: NextRequest) {
     }
 }
 
-// DELETE - Supprimer une mission
 export async function DELETE(request: NextRequest) {
     const { searchParams } = new URL(request.url)
     const id = searchParams.get('id')

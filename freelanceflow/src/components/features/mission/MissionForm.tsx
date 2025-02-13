@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { X } from 'lucide-react';
+import { X, Loader2 } from 'lucide-react';
 import { useMissionStore, type CreateMissionData } from '@/stores/useMissionStore';
 
 interface Developer {
     id: string;
     name: string;
+    email: string;
+    role: 'DEVELOPER' | 'PROJECT_MANAGER';
 }
 
 interface MissionFormProps {
@@ -17,16 +19,46 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [deadline, setDeadline] = useState('');
-    const [assignedToId, setAssignedToId] = useState('');  // Changé de assignedTo à assignedToId
+    const [assignedToId, setAssignedToId] = useState('');
     const [developers, setDevelopers] = useState<Developer[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        // TODO: Remplacer par un appel API réel
-        setDevelopers([
-            { id: '1', name: 'Dev 1' },
-            { id: '2', name: 'Dev 2' },
-            { id: '3', name: 'Dev 3' },
-        ]);
+        const fetchDevelopers = async () => {
+            try {
+                setLoading(true);
+                const token = localStorage.getItem('token');
+
+                if (!token) {
+                    throw new Error('Aucun token trouvé');
+                }
+
+                const response = await fetch('/api/users?role=DEVELOPER', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Impossible de récupérer les développeurs');
+                }
+
+                const data: Developer[] = await response.json();
+                setDevelopers(data);
+                setError(null);
+            } catch (err) {
+                console.error("Erreur de récupération des développeurs:", err);
+                setError(err instanceof Error ? err.message : 'Une erreur est survenue');
+                setDevelopers([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchDevelopers();
     }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -36,7 +68,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
                 title,
                 description,
                 deadline,
-                assignedToId: assignedToId || undefined  // Utilisation du bon nom de propriété
+                assignedToId: assignedToId || undefined
             };
 
             onSubmit(missionData);
@@ -111,17 +143,27 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
                         <label htmlFor="developer" className="block text-sm font-medium text-gray-300">
                             Développeur assigné
                         </label>
-                        <select
-                            id="developer"
-                            value={assignedToId}  // Changé de assignedTo à assignedToId
-                            onChange={(e) => setAssignedToId(e.target.value)}  // Changé ici aussi
-                            className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-[#FF4405] focus:border-transparent text-white"
-                        >
-                            <option value="">Sélectionner un développeur</option>
-                            {developers.map(dev => (
-                                <option key={dev.id} value={dev.id}>{dev.name}</option>
-                            ))}
-                        </select>
+                        {loading ? (
+                            <div className="flex items-center justify-center py-4">
+                                <Loader2 className="h-6 w-6 animate-spin text-[#FF4405]" />
+                            </div>
+                        ) : error ? (
+                            <div className="text-red-500 bg-red-500/10 p-3 rounded-lg">
+                                {error}
+                            </div>
+                        ) : (
+                            <select
+                                id="developer"
+                                value={assignedToId}
+                                onChange={(e) => setAssignedToId(e.target.value)}
+                                className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-[#FF4405] focus:border-transparent text-white"
+                            >
+                                <option value="">Sélectionner un développeur</option>
+                                {developers.map(dev => (
+                                    <option key={dev.id} value={dev.id}>{dev.name}</option>
+                                ))}
+                            </select>
+                        )}
                     </div>
 
                     <div className="flex items-center justify-end gap-4 pt-4">
@@ -134,7 +176,8 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
                         </button>
                         <button
                             type="submit"
-                            className="px-4 py-2 bg-[#FF4405] text-white rounded-lg hover:bg-[#e63d04] transition-all duration-300 shadow-lg hover:shadow-[#FF4405]/20"
+                            disabled={loading || !!error}
+                            className="px-4 py-2 bg-[#FF4405] text-white rounded-lg hover:bg-[#e63d04] transition-all duration-300 shadow-lg hover:shadow-[#FF4405]/20 disabled:opacity-50 disabled:cursor-not-allowed"
                         >
                             Créer la mission
                         </button>

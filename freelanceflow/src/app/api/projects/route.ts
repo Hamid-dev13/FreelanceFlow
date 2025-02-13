@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { headers } from "next/headers";
+import ProjectsPage from "@/app/(dashboard)/projects/page";
 
 // GET /api/projects - Liste des projets
 export async function GET() {
@@ -25,11 +26,14 @@ export async function GET() {
             },
             orderBy: { createdAt: 'desc' }
         });
-
+        console.log(projects);
         return NextResponse.json(projects);
     } catch (error) {
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
+
+
+
 }
 
 // POST /api/projects - Créer un projet
@@ -86,10 +90,11 @@ export async function POST(req: Request) {
                 }
             }
         });
-
+        console.log("Projet créé:", project);
         return NextResponse.json(project, { status: 201 });
     } catch (error) {
         console.error("Erreur création projet:", error);
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
     }
 }
+

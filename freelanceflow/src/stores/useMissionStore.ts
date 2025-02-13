@@ -36,6 +36,7 @@ export type Mission = {
         id: string;
         name: string;
         status: string;
+        title: string;
     } | null;
 };
 

@@ -113,6 +113,8 @@ export default function ProjectsPage() {
     };
 
     if (loading) {
+        console.log(projects);
+
         return (
             <div className="min-h-[400px] bg-gray-900 rounded-xl shadow-lg border border-gray-800 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4 text-[#FF4405]">

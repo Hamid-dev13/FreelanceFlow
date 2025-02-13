@@ -1,7 +1,5 @@
-// src/app/mission/project-manager/page.tsx
-"use client";
-
-import { useEffect, useState } from 'react';
+"use client"
+import React, { useEffect, useState } from 'react';
 import { Activity, Calendar, CheckCircle, Clock, Filter, ChevronDown, ChevronRight, Briefcase } from 'lucide-react';
 import { useMissionStore } from '@/stores/useMissionStore';
 import { ProjectManagerLayout } from '@/app/(dashboard)/_components/layouts/project-manager-layout';
@@ -9,9 +7,27 @@ import type { Mission, MissionStatus } from '@/stores/useMissionStore';
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-import { Project } from '@prisma/client';
 
-// Réutilisation des utilitaires et composants de dropdown
+type Project = {
+    id: string;
+    title: string;
+    description?: string;
+    status: string;
+    startDate: string;
+    endDate?: string;
+    clientId: string;
+    client: {
+        id: string;
+        name: string;
+    };
+};
+
+
+type ProjectGroup = {
+    project: Project;
+    missions: Mission[];
+};
+
 const cn = (...inputs: (string | undefined)[]) => twMerge(clsx(inputs));
 
 const DropdownMenu = DropdownMenuPrimitive.Root;
@@ -39,7 +55,6 @@ const DropdownMenuItem = ({ className, ...props }: React.ComponentPropsWithoutRe
     />
 );
 
-// Réutilisation du composant StatusBadge
 const StatusBadge = ({ status, isUpdating }: { status: MissionStatus, isUpdating: boolean }) => {
     const statusConfig = {
         'COMPLETED': {
@@ -79,13 +94,12 @@ const StatusBadge = ({ status, isUpdating }: { status: MissionStatus, isUpdating
     );
 };
 
-// Carte de mission adaptée pour le Project Manager
 const MissionCard = ({ mission, onStatusChange, updatingId }: {
     mission: Mission,
     onStatusChange: (mission: Mission, newStatus: MissionStatus) => Promise<void>,
     updatingId: string | null
 }) => (
-    <div key={mission.id} className="group relative overflow-hidden transition-all duration-300 hover:transform hover:scale-[1.02]">
+    <div className="group relative overflow-hidden transition-all duration-300 hover:transform hover:scale-[1.02]">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl" />
         <div className="relative p-6 bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-gray-800/50 transition-all duration-300 group-hover:border-primary/50 h-full">
             <DropdownMenu>
@@ -149,13 +163,13 @@ const MissionCard = ({ mission, onStatusChange, updatingId }: {
 );
 
 const ProjectSection = ({ project, missions, onStatusChange, updatingId }: {
-    project: { id: string; name: string; status: string; },
+    project: Project,
     missions: Mission[],
     onStatusChange: (mission: Mission, newStatus: MissionStatus) => Promise<void>,
     updatingId: string | null
 }) => {
     const [isExpanded, setIsExpanded] = useState(true);
-
+    console.log(project);
     return (
         <div className="space-y-4">
             <div
@@ -164,7 +178,9 @@ const ProjectSection = ({ project, missions, onStatusChange, updatingId }: {
             >
                 <div className="flex items-center gap-3">
                     <Briefcase className="w-5 h-5 text-primary" />
-                    <span className="font-medium text-white">{project.name}</span>
+                    <span className="font-medium text-white">
+                        {project.title}
+                    </span>
                 </div>
                 {isExpanded ?
                     <ChevronDown className="w-5 h-5 text-gray-400" /> :
@@ -187,10 +203,10 @@ const ProjectSection = ({ project, missions, onStatusChange, updatingId }: {
         </div>
     );
 };
+
 function ProjectManagerMissionsContent() {
     const { missions, fetchMissions, updateMissionStatus, startAutoRefresh } = useMissionStore();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
-    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
     useEffect(() => {
         fetchMissions('PROJECT_MANAGER').catch(console.error);
@@ -211,20 +227,26 @@ function ProjectManagerMissionsContent() {
         }
     };
 
-    // Grouper les missions par projet avec le bon type
-    const missionsByProject = missions.reduce((acc, mission) => {
+    const missionsByProject = missions.reduce<Record<string, ProjectGroup>>((acc, mission) => {
         if (!mission.project) return acc;
 
         const projectId = mission.project.id;
         if (!acc[projectId]) {
             acc[projectId] = {
-                project: mission.project,
+                project: {
+                    id: mission.project.id,
+                    title: mission.project.title || 'Projet sans nom',
+                    status: mission.project.status,
+                    startDate: mission.project.startDate,
+                    clientId: mission.project.clientId,
+                    client: mission.project.client
+                },
                 missions: []
             };
         }
         acc[projectId].missions.push(mission);
         return acc;
-    }, {} as Record<string, { project: { id: string; name: string; status: string; }; missions: Mission[] }>);
+    }, {});
 
     return (
         <div className="space-y-8">
@@ -233,7 +255,7 @@ function ProjectManagerMissionsContent() {
                     <h1 className="text-3xl font-bold flex items-center gap-3">
                         <Activity className="h-8 w-8 text-primary" />
                         <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            {selectedProject ? selectedProject.title : "Missions du Projet"}
+                            Missions du Projet
                         </span>
                     </h1>
                     <p className="mt-2 text-gray-400">Suivez et gérez l'avancement des missions</p>

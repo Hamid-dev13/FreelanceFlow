@@ -2,9 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyJWT } from '@/features/auth/services/jwt';
-
 export async function GET(request: NextRequest) {
-    // Récupérer le token d'authentification
     const token = request.headers.get('authorization')?.split('Bearer ')[1];
 
     if (!token) {
@@ -15,10 +13,8 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-        // Vérifier le token
         const decoded = await verifyJWT(token);
 
-        // Vérifier que decoded.userId est bien une chaîne
         if (typeof decoded.userId !== 'string') {
             return NextResponse.json(
                 { message: 'ID utilisateur invalide' },
@@ -26,11 +22,19 @@ export async function GET(request: NextRequest) {
             );
         }
 
-        // Récupérer les missions spécifiquement assignées à l'utilisateur
+        // Récupérer l'utilisateur et son rôle
+        const user = await prisma.user.findUnique({
+            where: { id: decoded.userId },
+            select: { role: true }
+        });
+
+        // Définir les conditions de recherche selon le rôle
+        const whereCondition = user?.role === 'PROJECT_MANAGER'
+            ? { createdById: decoded.userId }  // Project Manager voit ses missions créées
+            : { assignedToId: decoded.userId }; // Developer voit ses missions assignées
+
         const missions = await prisma.mission.findMany({
-            where: {
-                assignedToId: decoded.userId  // Utiliser userId au lieu de id
-            },
+            where: whereCondition,
             include: {
                 assignedTo: {
                     select: {
@@ -49,13 +53,12 @@ export async function GET(request: NextRequest) {
                 project: {
                     select: {
                         id: true,
-                        name: true,
                         status: true
                     }
                 }
             },
             orderBy: {
-                createdAt: 'desc' // Trier par date de création décroissante
+                createdAt: 'desc'
             }
         });
 
@@ -124,7 +127,7 @@ export async function POST(request: NextRequest) {
                 project: {
                     select: {
                         id: true,
-                        name: true,
+
                         status: true
                     }
                 }

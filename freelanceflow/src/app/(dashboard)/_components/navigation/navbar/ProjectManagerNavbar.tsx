@@ -1,7 +1,6 @@
-"use client";
 import React from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, FolderKanban, Plus, Layout, ClipboardList } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Plus, Layout, ClipboardList, Users } from 'lucide-react';
 
 type ProjectManagerNavbarProps = {
     onNewMission: () => void;
@@ -40,6 +39,15 @@ export const ProjectManagerNavbar = ({ onNewMission, isModalOpen }: ProjectManag
                                 >
                                     <FolderKanban className="h-5 w-5" />
                                     <span>Gestion des projets</span>
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    href="/clients"
+                                    className="flex items-center gap-2 text-gray-300 hover:text-[#FF4405] transition-colors"
+                                >
+                                    <Users className="h-5 w-5" />
+                                    <span>Clients</span>
                                 </Link>
                             </li>
                             <li>

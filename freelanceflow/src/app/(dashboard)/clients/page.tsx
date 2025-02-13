@@ -1,5 +1,7 @@
 "use client";
-
+import AddClientModal from '@/components/features/ui/addClientModal';
+import EditClientModal from '@/components/features/ui/EditClientModal';
+import DeleteClientModal from '@/components/features/ui/DeleteClientModal';
 import { useState, useEffect } from "react";
 import {
     UserPlus,
@@ -12,9 +14,7 @@ import {
     AlertCircle,
     Loader2
 } from 'lucide-react';
-import AddClientModal from '@/components/features/ui/addClientModal';
-import EditClientModal from '@/components/features/ui/EditClientModal';
-import DeleteClientModal from '@/components/features/ui/DeleteClientModal';
+
 type Client = {
     id: string;
     name: string;

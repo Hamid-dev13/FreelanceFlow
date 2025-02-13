@@ -50,7 +50,7 @@ model Client {
 
 model Project {
   id          String    @id @default(uuid())
-   name        String    // Ajoutez cette ligne
+  // Supprimez la ligne "name String"
   title       String
   description String?   @db.Text
   startDate   DateTime  @default(now())

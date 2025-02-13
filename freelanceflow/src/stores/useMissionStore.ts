@@ -55,6 +55,7 @@ export const useMissionStore = create<MissionState>()(
 
                 fetchMissions: async (role: UserRole) => {
                     try {
+
                         const token = localStorage.getItem('token');
                         if (!token) {
                             throw new Error('Aucun token trouvé');
@@ -64,7 +65,8 @@ export const useMissionStore = create<MissionState>()(
                             method: 'GET',
                             headers: {
                                 'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
+                                'Cache-Control': 'no-cache'
                             }
                         });
 

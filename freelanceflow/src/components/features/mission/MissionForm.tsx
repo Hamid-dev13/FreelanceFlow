@@ -25,9 +25,10 @@ interface Project {
 interface MissionFormProps {
     onClose: () => void;
     onSubmit: (missionData: CreateMissionData) => void;
+    onProjectSelect?: (project: Project | null) => void;
 }
 
-const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
+const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit, onProjectSelect }) => {
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
     const [deadline, setDeadline] = useState('');
@@ -40,7 +41,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
     const [projectsLoading, setProjectsLoading] = useState(true);
     const [projectsError, setProjectsError] = useState<string | null>(null);
 
-    // Effet pour charger les développeurs
     useEffect(() => {
         const fetchDevelopers = async () => {
             try {
@@ -78,7 +78,6 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
         fetchDevelopers();
     }, []);
 
-    // Effet pour charger les projets
     useEffect(() => {
         const fetchProjects = async () => {
             try {
@@ -115,6 +114,17 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
 
         fetchProjects();
     }, []);
+
+    const handleProjectChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const selectedId = e.target.value;
+        setProjectId(selectedId);
+
+        // Trouver et transmettre le projet sélectionné au parent
+        const selectedProject = selectedId
+            ? projects.find(p => p.id === selectedId) || null
+            : null;
+        onProjectSelect?.(selectedProject);
+    };
 
     const handleModalClick = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -211,7 +221,7 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit }) => {
                             <select
                                 id="project"
                                 value={projectId}
-                                onChange={(e) => setProjectId(e.target.value)}
+                                onChange={handleProjectChange}
                                 className="w-full px-4 py-2 bg-gray-800 border border-gray-700 rounded-lg focus:ring-2 focus:ring-[#FF4405] focus:border-transparent text-white"
                             >
                                 <option value="">Sélectionner un projet</option>

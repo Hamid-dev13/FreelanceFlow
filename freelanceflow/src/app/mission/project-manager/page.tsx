@@ -2,13 +2,14 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Activity, Calendar, CheckCircle, Clock, Filter } from 'lucide-react';
+import { Activity, Calendar, CheckCircle, Clock, Filter, ChevronDown, ChevronRight, Briefcase } from 'lucide-react';
 import { useMissionStore } from '@/stores/useMissionStore';
 import { ProjectManagerLayout } from '@/app/(dashboard)/_components/layouts/project-manager-layout';
 import type { Mission, MissionStatus } from '@/stores/useMissionStore';
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { Project } from '@prisma/client';
 
 // Réutilisation des utilitaires et composants de dropdown
 const cn = (...inputs: (string | undefined)[]) => twMerge(clsx(inputs));
@@ -147,19 +148,53 @@ const MissionCard = ({ mission, onStatusChange, updatingId }: {
     </div>
 );
 
+const ProjectSection = ({ project, missions, onStatusChange, updatingId }: {
+    project: { id: string; name: string; status: string; },
+    missions: Mission[],
+    onStatusChange: (mission: Mission, newStatus: MissionStatus) => Promise<void>,
+    updatingId: string | null
+}) => {
+    const [isExpanded, setIsExpanded] = useState(true);
 
+    return (
+        <div className="space-y-4">
+            <div
+                onClick={() => setIsExpanded(!isExpanded)}
+                className="flex items-center justify-between p-4 bg-gray-900/90 backdrop-blur-xl rounded-xl border border-gray-800/50 cursor-pointer transition-all duration-300 hover:border-primary/50"
+            >
+                <div className="flex items-center gap-3">
+                    <Briefcase className="w-5 h-5 text-primary" />
+                    <span className="font-medium text-white">{project.name}</span>
+                </div>
+                {isExpanded ?
+                    <ChevronDown className="w-5 h-5 text-gray-400" /> :
+                    <ChevronRight className="w-5 h-5 text-gray-400" />
+                }
+            </div>
+
+            {isExpanded && (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3 pl-2">
+                    {missions.map((mission) => (
+                        <MissionCard
+                            key={mission.id}
+                            mission={mission}
+                            onStatusChange={onStatusChange}
+                            updatingId={updatingId}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+};
 function ProjectManagerMissionsContent() {
     const { missions, fetchMissions, updateMissionStatus, startAutoRefresh } = useMissionStore();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [selectedProject, setSelectedProject] = useState<Project | null>(null);
 
     useEffect(() => {
-        // Fetch initial
         fetchMissions('PROJECT_MANAGER').catch(console.error);
-
-        // Démarre le refresh automatique
         const stopRefresh = startAutoRefresh('PROJECT_MANAGER');
-
-        // Nettoie l'interval à la désactivation du composant
         return () => stopRefresh();
     }, [fetchMissions, startAutoRefresh]);
 
@@ -175,6 +210,22 @@ function ProjectManagerMissionsContent() {
             setUpdatingId(null);
         }
     };
+
+    // Grouper les missions par projet avec le bon type
+    const missionsByProject = missions.reduce((acc, mission) => {
+        if (!mission.project) return acc;
+
+        const projectId = mission.project.id;
+        if (!acc[projectId]) {
+            acc[projectId] = {
+                project: mission.project,
+                missions: []
+            };
+        }
+        acc[projectId].missions.push(mission);
+        return acc;
+    }, {} as Record<string, { project: { id: string; name: string; status: string; }; missions: Mission[] }>);
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-gray-900/50 p-6 rounded-2xl border border-gray-800/50">
@@ -182,7 +233,7 @@ function ProjectManagerMissionsContent() {
                     <h1 className="text-3xl font-bold flex items-center gap-3">
                         <Activity className="h-8 w-8 text-primary" />
                         <span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                            Missions du Projet
+                            {selectedProject ? selectedProject.title : "Missions du Projet"}
                         </span>
                     </h1>
                     <p className="mt-2 text-gray-400">Suivez et gérez l'avancement des missions</p>
@@ -195,11 +246,12 @@ function ProjectManagerMissionsContent() {
                 </div>
             </div>
 
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                {missions.map((mission) => (
-                    <MissionCard
-                        key={mission.id}
-                        mission={mission}
+            <div className="space-y-6">
+                {Object.values(missionsByProject).map(({ project, missions }) => (
+                    <ProjectSection
+                        key={project.id}
+                        project={project}
+                        missions={missions}
                         onStatusChange={handleStatusChange}
                         updatingId={updatingId}
                     />

@@ -32,7 +32,7 @@ export const ProjectManagerLayout = ({ children }: ProjectManagerLayoutProps) =>
                             {/* Logo et titre */}
                             <div className="flex items-center gap-3 mr-8">
                                 <Layout className="h-6 w-6 text-[#FF4405]" />
-                                <span className="text-lg font-semibold">Project Manager</span>
+                                <span className="text-lg font-semibold">Freelance flow</span>
                             </div>
 
                             {/* Navigation */}

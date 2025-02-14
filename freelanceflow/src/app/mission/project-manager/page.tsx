@@ -7,7 +7,7 @@ import type { Mission, MissionStatus } from '@/stores/useMissionStore';
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
-
+import { GradientText } from '@/app/(auth)/Stylecomponents/GradientText';
 type Project = {
     id: string;
     title: string;
@@ -157,9 +157,9 @@ const MissionCard = ({ mission, onStatusChange, updatingId }: {
                 </DropdownMenu>
 
                 <div className="space-y-4">
-                    <h2 className="text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent pr-24">
+                    <GradientText className="text-xl font-semibold pr-24">
                         {safeTitle}
-                    </h2>
+                    </GradientText>
                     <p className="text-gray-400 line-clamp-2">
                         {mission.description || 'Aucune description'}
                     </p>
@@ -208,9 +208,9 @@ const ProjectSection = ({ project, missions, onStatusChange, updatingId }: Proje
                 <div className="flex items-center gap-3">
                     <Briefcase className="w-5 h-5 text-primary" />
                     <div>
-                        <span className="font-medium text-white">
+                        <GradientText className="text-xl font-semibold pr-24">
                             {project.title}
-                        </span>
+                        </GradientText>
                         <div className="text-sm text-gray-400">
                             {missions.length} mission{missions.length > 1 ? 's' : ''}
                             {project.client && ` - Client: ${project.client.name}`}

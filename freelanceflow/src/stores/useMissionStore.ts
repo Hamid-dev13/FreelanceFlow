@@ -48,6 +48,7 @@ interface MissionState {
     error: string | null;
     fetchMissions: (role: UserRole) => Promise<void>;
     updateMissionStatus: (id: string, status: MissionStatus) => Promise<void>;
+    createMission: (missionData: Partial<Mission>) => Promise<Mission | null>;
     startAutoRefresh: (role: UserRole) => () => void;
 }
 
@@ -80,7 +81,7 @@ export const useMissionStore = create<MissionState>()(
             (set, get) => ({
                 missions: [],
                 error: null,
-                isHydrated: false, // Nouvel état pour suivre l'hydration
+                isHydrated: false,
                 fetchMissions: async (role: UserRole) => {
                     try {
                         const token = localStorage.getItem('token');
@@ -93,7 +94,6 @@ export const useMissionStore = create<MissionState>()(
                             headers: {
                                 'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json',
-
                             }
                         });
 
@@ -104,7 +104,6 @@ export const useMissionStore = create<MissionState>()(
                         const data: Mission[] = await response.json();
                         console.log('Données reçues de l\'API:', data);
 
-                        // S'assurer que toutes les missions ont un titre
                         const validatedData = data.map(mission => ({
                             ...mission,
                             title: mission.title || 'Sans titre',
@@ -159,6 +158,56 @@ export const useMissionStore = create<MissionState>()(
                     }
                 },
 
+                createMission: async (missionData: Partial<Mission>) => {
+                    try {
+                        const token = localStorage.getItem('token');
+                        if (!token) throw new Error('No token found');
+
+                        // Validate required fields
+                        if (!missionData.title) {
+                            throw new Error('Mission title is required');
+                        }
+
+                        const response = await fetch('/api/mission', {
+                            method: 'POST',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                ...missionData,
+                                status: missionData.status || 'PENDING',
+                                title: missionData.title,
+                                description: missionData.description || null
+                            })
+                        });
+
+                        if (!response.ok) {
+                            const errorText = await response.text();
+                            throw new Error(`Failed to create mission: ${errorText}`);
+                        }
+
+                        const newMission: Mission = await response.json();
+
+                        // Optimistically update the local state
+                        const currentMissions = get().missions;
+                        set({
+                            missions: [...currentMissions, newMission],
+                            error: null
+                        });
+
+                        // Refresh missions to ensure full synchronization
+                        await get().fetchMissions('PROJECT_MANAGER');
+
+                        return newMission;
+                    } catch (error) {
+                        const errorMessage = error instanceof Error ? error.message : 'An error occurred while creating the mission';
+                        set({ error: errorMessage });
+                        console.error('Error creating mission:', error);
+                        return null;
+                    }
+                },
+
                 startAutoRefresh: (role: UserRole) => {
                     // Désactivé temporairement pour debug
                     return () => { };
@@ -182,4 +231,4 @@ export const useMissionStore = create<MissionState>()(
             }
         )
     )
-);
+); 

@@ -2,16 +2,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
-import { verifyJWT, signJWT } from '@/features/auth/services/jwt';
-
-interface LoginPayload {
-    email: string;
-    password: string;
-}
+import { signJWT } from '@/features/auth/services/jwt';
 
 export async function POST(req: Request) {
     try {
-        const { email, password }: LoginPayload = await req.json();
+        const { email, password } = await req.json();
 
         if (!email || !password) {
             return NextResponse.json(
@@ -31,23 +26,48 @@ export async function POST(req: Request) {
             );
         }
 
-        // Générer le token JWT avec le rôle
-        const token = await signJWT({
+        // Access Token (courte durée)
+        const accessToken = await signJWT({
             userId: user.id,
             email: user.email,
             role: user.role as 'DEVELOPER' | 'PROJECT_MANAGER',
-            iat: Math.floor(Date.now() / 1000),
-            exp: Math.floor(Date.now() / 1000) + (24 * 60 * 60), // 24 heures
-        });
+            type: 'access'
+        }, '15m');
+        console.log("Token généré:", accessToken); // Ajout de ce log
+        console.log("DEBUG - Payload:", {
+            userId: user.id,
+            email: user.email,
+            role: user.role,
+            type: 'access'
+        }); // Debug
 
-        return NextResponse.json({
-            token,
+        // Refresh Token (longue durée)
+        const refreshToken = await signJWT({
+            userId: user.id,
+            type: 'refresh'
+        }, '30d');  // 30 jours
+
+        // Créer la réponse
+        const response = NextResponse.json({
+            accessToken,
             user: {
                 id: user.id,
                 email: user.email,
                 role: user.role
             }
         });
+
+        // Ajouter le refresh token comme cookie HttpOnly
+        response.cookies.set({
+            name: 'refresh_token',
+            value: refreshToken,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60 // 30 jours en secondes
+        });
+
+        return response;
 
     } catch (error) {
         console.error("Erreur login:", error);

@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { ProjectManagerLayout } from '@/app/(dashboard)/_components';
 import { DeveloperLayout } from '@/app/(dashboard)/_components/';
 import { Layout } from "lucide-react";
+import { useAuthRefresh } from '@/hooks/useAuthRefresh'; // Importer le nouveau hook
+
 type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
 
 export default function DashboardLayout({
@@ -19,13 +21,18 @@ export default function DashboardLayout({
     const [pageLoaded, setPageLoaded] = useState(false);
     const [role, setRole] = useState<UserRole | null>(null);
 
+    // Utiliser le hook de refresh de token
+    const refreshedToken = useAuthRefresh();
+
     useEffect(() => {
         const token = localStorage.getItem("token");
+        console.log("DEBUG - Token récupéré:", token);
         if (!token) {
             router.push("/login");
         } else {
             try {
                 const decoded = jwtDecode(token) as { role: UserRole };
+                console.log("DEBUG - Token décodé:", decoded);
                 setRole(decoded.role);
                 setLoading(false);
             } catch (error) {
@@ -34,7 +41,7 @@ export default function DashboardLayout({
                 router.push("/login");
             }
         }
-    }, [router]);
+    }, [router, refreshedToken]); // Ajouter refreshedToken comme dépendance
 
     if (loading) {
         return (
@@ -50,7 +57,7 @@ export default function DashboardLayout({
     }
     return role === 'PROJECT_MANAGER' ? (
         <ProjectManagerLayout>
-            {children} {/* S'assurer que children est toujours passé ici */}
+            {children}
         </ProjectManagerLayout>
     ) : (
         <DeveloperLayout>{children}</DeveloperLayout>

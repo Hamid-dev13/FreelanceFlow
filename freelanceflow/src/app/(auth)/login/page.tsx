@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { LogIn, UserPlus, Loader2, ArrowLeft, Zap } from 'lucide-react';
@@ -14,9 +14,18 @@ export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const [loginSuccess, setLoginSuccess] = useState<{ token: string } | null>(null);
+
+    // Nouvel useEffect pour gérer le stockage du token
+    useEffect(() => {
+        if (loginSuccess) {
+            console.log("DEBUG - Stockage du token dans useEffect");
+            localStorage.setItem("token", loginSuccess.token);
+            router.push('/dashboard');
+        }
+    }, [loginSuccess, router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -33,12 +42,11 @@ export default function LoginPage() {
             });
 
             const data = await res.json();
+            console.log("DEBUG - Données reçues:", data);
 
             if (res.ok) {
-                localStorage.setItem("token", data.token);
-                // Toujours rediriger vers /dashboard
-                router.push('/dashboard');
-                // Le layout s'occupera d'afficher la bonne interface selon le rôle
+                // Au lieu de stocker directement, on passe par le state
+                setLoginSuccess({ token: data.accessToken });
             } else {
                 setError(data.error || "Erreur de connexion");
             }

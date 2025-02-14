@@ -1,6 +1,11 @@
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import { verifyJWT } from '@/features/auth/services/jwt'
+import { verifyJWT, JWTPayload, AccessTokenPayload } from '@/features/auth/services/jwt'
+
+// Fonction de type guard
+function isAccessTokenPayload(payload: JWTPayload): payload is AccessTokenPayload {
+    return payload.type === 'access';
+}
 
 export async function middleware(request: NextRequest) {
     // Vérifie si l'URL commence par /api/auth/
@@ -29,6 +34,14 @@ export async function middleware(request: NextRequest) {
         const payload = await verifyJWT(token)
 
         console.log("✅ Payload décodé:", payload);
+
+        // Vérifier si c'est un token d'accès
+        if (!isAccessTokenPayload(payload)) {
+            return NextResponse.json(
+                { error: 'Token invalide - Nécessite un token d\'accès' },
+                { status: 401 }
+            )
+        }
 
         // Ajouter les informations utilisateur dans les headers
         const requestHeaders = new Headers(request.headers)

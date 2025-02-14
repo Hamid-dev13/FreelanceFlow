@@ -1,12 +1,26 @@
 // src/features/auth/services/jwt.ts
 import * as jose from 'jose'
 
-export interface JWTPayload extends jose.JWTPayload {
+// Interface de base pour tous les tokens
+interface BaseJWTPayload extends jose.JWTPayload {
     userId: string;
+    type: 'access' | 'refresh';
+}
+
+// Interface pour l'access token
+export interface AccessTokenPayload extends BaseJWTPayload {
+    type: 'access';
     email: string;
     role: 'DEVELOPER' | 'PROJECT_MANAGER';
-    [key: string]: jose.JWTPayload[keyof jose.JWTPayload] | string | undefined;
 }
+
+// Interface pour le refresh token
+interface RefreshTokenPayload extends BaseJWTPayload {
+    type: 'refresh';
+}
+
+// Type union pour export
+export type JWTPayload = AccessTokenPayload | RefreshTokenPayload;
 
 const JWT_SECRET = new TextEncoder().encode(
     process.env.JWT_SECRET || 'your-secret-key'
@@ -21,41 +35,35 @@ export async function verifyJWT(token: string): Promise<JWTPayload> {
         // Tenter de reconstruire un JWT valide si nécessaire
         let validToken = token
 
-        // Si le token est un long hash sans points, il est probablement mal formé
-        if (!token.includes('.')) {
-            console.warn("⚠️ Token sans séparateurs JWT")
-
-            // Tentative de réparation (à adapter selon votre génération de token)
-            const parts = [
-                Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64'),
-                Buffer.from(JSON.stringify({
-                    userId: token.slice(0, 36),  // Extraction potentielle de l'UUID
-                    email: 'placeholder@example.com',
-                    role: 'PROJECT_MANAGER',
-                    exp: Math.floor(Date.now() / 1000) + 3600  // 1 heure de validité
-                })).toString('base64'),
-                ''  // Signature (à générer si possible)
-            ]
-
-            validToken = parts.join('.')
-            console.log("🔧 Token reconstruit:", validToken)
-        }
-
-        // Vérification du token
         const { payload } = await jose.jwtVerify(validToken, JWT_SECRET)
 
         console.log("✅ Payload décodé:", payload)
 
-        // Conversion et validation du payload
-        if (!payload.userId || !payload.email || !payload.role) {
-            throw new Error('Payload incomplet')
-        }
+        // Type guard pour s'assurer que le payload a les propriétés attendues
+        const isRefreshToken = (p: unknown): p is RefreshTokenPayload =>
+            typeof p === 'object' && p !== null &&
+            'userId' in p && 'type' in p && (p as any).type === 'refresh';
 
-        return {
-            userId: payload.userId as string,
-            email: payload.email as string,
-            role: payload.role as 'DEVELOPER' | 'PROJECT_MANAGER',
-            ...payload  // Inclure les autres propriétés du payload
+        const isAccessToken = (p: unknown): p is AccessTokenPayload =>
+            typeof p === 'object' && p !== null &&
+            'userId' in p && 'email' in p && 'role' in p &&
+            (p as any).type === 'access';
+
+        // Validation différente selon le type de token
+        if (isRefreshToken(payload)) {
+            return {
+                type: 'refresh',
+                userId: payload.userId,
+            } as RefreshTokenPayload;
+        } else if (isAccessToken(payload)) {
+            return {
+                type: 'access',
+                userId: payload.userId,
+                email: payload.email,
+                role: payload.role,
+            } as AccessTokenPayload;
+        } else {
+            throw new Error('Type de token non reconnu ou incomplet');
         }
     } catch (error) {
         console.error('🚨 Erreur complète de vérification:', error)
@@ -71,11 +79,15 @@ export async function verifyJWT(token: string): Promise<JWTPayload> {
     }
 }
 
-export async function signJWT(payload: JWTPayload) {
+export async function signJWT(payload: JWTPayload, expirationTime: string | number) {
+    if (!payload || !expirationTime) {
+        throw new Error('Payload et expirationTime sont requis');
+    }
+
     try {
         const jwt = await new jose.SignJWT(payload)
             .setProtectedHeader({ alg: 'HS256' })
-            .setExpirationTime('24h')
+            .setExpirationTime(expirationTime)
             .sign(JWT_SECRET);
 
         return jwt;

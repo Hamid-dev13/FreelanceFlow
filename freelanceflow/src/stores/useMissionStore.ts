@@ -50,6 +50,7 @@ interface MissionState {
     updateMissionStatus: (id: string, status: MissionStatus) => Promise<void>;
     createMission: (missionData: Partial<Mission>) => Promise<Mission | null>;
     startAutoRefresh: (role: UserRole) => () => void;
+    deleteMission: (id: string) => Promise<void>;
 }
 
 const storage: StateStorage = {
@@ -158,6 +159,57 @@ export const useMissionStore = create<MissionState>()(
                     }
                 },
 
+                deleteMission: async (id: string) => {
+                    const currentMissions = get().missions;
+                    try {
+                        const token = localStorage.getItem('token');
+                        if (!token) throw new Error('No token found');
+
+                        // Mise à jour optimiste
+                        set({
+                            missions: currentMissions.filter(mission => mission.id !== id)
+                        });
+
+                        const response = await fetch(`/api/mission/${id}`, {
+                            method: 'DELETE',
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        // Log additional details about the response
+                        console.log('Delete Response Status:', response.status);
+                        console.log('Delete Response Headers:', Object.fromEntries(response.headers.entries()));
+
+                        if (!response.ok) {
+                            // Get more detailed error information
+                            const errorText = await response.text();
+                            console.error('Delete Mission Error Details:', {
+                                status: response.status,
+                                statusText: response.statusText,
+                                errorText: errorText
+                            });
+
+                            // Restaurer l'état précédent en cas d'erreur
+                            set({ missions: currentMissions });
+                            throw new Error(`Failed to delete mission: ${errorText}`);
+                        }
+
+                    } catch (error) {
+                        // More comprehensive error logging
+                        console.error('Full Error in Delete Mission:', {
+                            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+                            errorStack: error instanceof Error ? error.stack : undefined
+                        });
+
+                        // Restaurer l'état précédent en cas d'erreur
+                        set({ missions: currentMissions });
+                        throw error;
+                    }
+                },
+
+
                 createMission: async (missionData: Partial<Mission>) => {
                     try {
                         const token = localStorage.getItem('token');
@@ -231,4 +283,4 @@ export const useMissionStore = create<MissionState>()(
             }
         )
     )
-); 
+);

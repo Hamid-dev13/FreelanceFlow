@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { Activity, Calendar, CheckCircle, Clock, Filter, ChevronRight, Check, Circle } from 'lucide-react';
+import { Activity, Calendar, CheckCircle, Clock, Filter, X } from 'lucide-react';
 import { useMissionStore } from '@/stores/useMissionStore';
 import { DeveloperLayout } from '@/app/(dashboard)/_components/layouts/developer-layout';
 import type { Mission, MissionStatus } from '@/stores/useMissionStore';
@@ -10,10 +10,8 @@ import { GradientText } from '@/app/(auth)/Stylecomponents/GradientText';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// Utilitaire cn
 const cn = (...inputs: (string | undefined)[]) => twMerge(clsx(inputs));
 
-// Composants Dropdown
 const DropdownMenu = DropdownMenuPrimitive.Root;
 const DropdownMenuTrigger = DropdownMenuPrimitive.Trigger;
 const DropdownMenuContent = ({ className, sideOffset = 4, ...props }: React.ComponentPropsWithoutRef<typeof DropdownMenuPrimitive.Content> & { sideOffset?: number }) => (
@@ -86,16 +84,26 @@ const StatusBadge = ({ status, isUpdating }: StatusBadgeProps) => {
 interface MissionCardProps {
     mission: Mission;
     onStatusChange: (mission: Mission, newStatus: MissionStatus) => Promise<void>;
+    onDelete: (mission: Mission) => Promise<void>;
     updatingId: string | null;
+    deletingId: string | null;
 }
 
-const MissionCard = ({ mission, onStatusChange, updatingId }: MissionCardProps) => (
+const MissionCard = ({ mission, onStatusChange, onDelete, updatingId, deletingId }: MissionCardProps) => (
     <div key={mission.id} className="group relative overflow-hidden transition-all duration-300 hover:transform hover:scale-[1.02]">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl" />
         <div className="relative p-6 bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-gray-800/50 transition-all duration-300 group-hover:border-primary/50 h-full">
+            <button
+                onClick={() => onDelete(mission)}
+                disabled={deletingId === mission.id}
+                className="absolute top-4 right-4 p-2 text-gray-400 hover:text-red-500 transition-colors"
+            >
+                <X className="w-5 h-5" />
+            </button>
+
             <DropdownMenu>
                 <DropdownMenuTrigger
-                    className="absolute top-4 right-4 focus:outline-none"
+                    className="absolute top-4 right-14 focus:outline-none"
                     disabled={updatingId === mission.id}
                 >
                     <StatusBadge
@@ -150,20 +158,15 @@ const MissionCard = ({ mission, onStatusChange, updatingId }: MissionCardProps) 
 );
 
 function MissionsContent() {
-    const { missions, fetchMissions, updateMissionStatus, startAutoRefresh } = useMissionStore();
+    const { missions, fetchMissions, updateMissionStatus, deleteMission, startAutoRefresh } = useMissionStore();
     const [updatingId, setUpdatingId] = useState<string | null>(null);
+    const [deletingId, setDeletingId] = useState<string | null>(null);
 
     useEffect(() => {
-        // Fetch initial
         fetchMissions('DEVELOPER').catch(console.error);
-
-        // Démarre le refresh automatique
         const stopRefresh = startAutoRefresh('DEVELOPER');
-
-        // Nettoie l'interval à la désactivation du composant
         return () => stopRefresh();
     }, [fetchMissions, startAutoRefresh]);
-
 
     const handleStatusChange = async (mission: Mission, newStatus: MissionStatus) => {
         if (updatingId || mission.status === newStatus) return;
@@ -178,6 +181,20 @@ function MissionsContent() {
         }
     };
 
+    const handleDelete = async (mission: Mission) => {
+        if (deletingId) return;
+
+        if (window.confirm('Êtes-vous sûr de vouloir supprimer cette mission ?')) {
+            setDeletingId(mission.id);
+            try {
+                await deleteMission(mission.id);
+            } catch (error) {
+                console.error('Erreur lors de la suppression:', error);
+            } finally {
+                setDeletingId(null);
+            }
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -205,7 +222,9 @@ function MissionsContent() {
                         key={mission.id}
                         mission={mission}
                         onStatusChange={handleStatusChange}
+                        onDelete={handleDelete}
                         updatingId={updatingId}
+                        deletingId={deletingId}
                     />
                 ))}
             </div>

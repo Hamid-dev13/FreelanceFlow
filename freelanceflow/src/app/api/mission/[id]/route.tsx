@@ -143,3 +143,45 @@ export async function GET(request: NextRequest) {
         );
     }
 }
+// Ajoutez cette méthode DELETE
+export async function DELETE(
+    request: NextRequest,
+    context: { params: { id: string } }
+) {
+    const { id } = await Promise.resolve(context.params);
+
+    const token = request.headers.get('authorization')?.split('Bearer ')[1];
+
+    if (!token) {
+        return NextResponse.json(
+            { message: 'Token d\'authentification requis' },
+            { status: 401 }
+        );
+    }
+
+    try {
+        // Vérifier le token
+        const decoded = await verifyJWT(token);
+
+        // Supprimer la mission
+        const deletedMission = await prisma.mission.delete({
+            where: {
+                id: id,
+                // Optionnel : ajouter une vérification d'autorisation
+                // Par exemple, seul le créateur peut supprimer
+                // createdById: decoded.id 
+            }
+        });
+
+        return NextResponse.json(deletedMission, { status: 200 });
+    } catch (error) {
+        console.error('Erreur lors de la suppression de la mission:', error);
+        return NextResponse.json(
+            {
+                message: 'Erreur lors de la suppression de la mission',
+                error: error instanceof Error ? error.message : String(error)
+            },
+            { status: 500 }
+        );
+    }
+}

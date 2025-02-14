@@ -112,21 +112,6 @@ export default function ProjectsPage() {
         }
     };
 
-    if (loading) {
-        console.log(projects);
-
-        return (
-            <div className="min-h-[400px] bg-gray-900 rounded-xl shadow-lg border border-gray-800 flex items-center justify-center">
-                <div className="flex flex-col items-center gap-4 text-[#FF4405]">
-                    <Briefcase className="h-12 w-12 animate-pulse" />
-                    <div className="flex items-center gap-2">
-                        <Loader2 className="h-6 w-6 animate-spin" />
-                        <span>Chargement des projets...</span>
-                    </div>
-                </div>
-            </div>
-        );
-    }
 
     return (
         <div className="bg-gray-900 rounded-xl shadow-lg border border-gray-800">

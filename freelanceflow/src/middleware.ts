@@ -13,10 +13,12 @@ export async function middleware(request: NextRequest) {
         return NextResponse.next()
     }
 
-    // Récupère le header Authorization
+    // Récupère le header Authorization et le rôle stocké
     const authHeader = request.headers.get('Authorization')
+    const storedRole = request.cookies.get('user_role')?.value
 
     console.log("🔍 Authorization header complet:", authHeader);
+    console.log("🕵️ Rôle stocké:", storedRole);
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
         return NextResponse.json(
@@ -41,6 +43,12 @@ export async function middleware(request: NextRequest) {
                 { error: 'Token invalide - Nécessite un token d\'accès' },
                 { status: 401 }
             )
+        }
+
+        // Vérifier la cohérence du rôle
+        if (storedRole && payload.role !== storedRole) {
+            console.warn("⚠️ Incohérence de rôle détectée");
+            return NextResponse.redirect(new URL('/login', request.url))
         }
 
         // Ajouter les informations utilisateur dans les headers

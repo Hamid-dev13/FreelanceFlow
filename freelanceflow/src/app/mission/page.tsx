@@ -6,6 +6,7 @@ import { useMissionStore } from '@/stores/useMissionStore';
 import { DeveloperLayout } from '@/app/(dashboard)/_components/layouts/developer-layout';
 import type { Mission, MissionStatus } from '@/stores/useMissionStore';
 import * as DropdownMenuPrimitive from "@radix-ui/react-dropdown-menu";
+import { GradientText } from '@/app/(auth)/Stylecomponents/GradientText';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -126,9 +127,10 @@ const MissionCard = ({ mission, onStatusChange, updatingId }: MissionCardProps) 
             </DropdownMenu>
 
             <div className="space-y-4">
-                <h2 className="text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent pr-24">
+                <GradientText className="text-xl font-semibold pr-24">
                     {mission.title}
-                </h2>
+                </GradientText>
+
                 <p className="text-gray-400 line-clamp-2">
                     {mission.description || 'Aucune description'}
                 </p>

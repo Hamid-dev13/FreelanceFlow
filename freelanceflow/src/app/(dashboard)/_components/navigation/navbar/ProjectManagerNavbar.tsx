@@ -1,6 +1,15 @@
 import React from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, FolderKanban, Plus, Layout, ClipboardList, Users } from 'lucide-react';
+import {
+    LayoutDashboard,
+    FolderKanban,
+    Plus,
+    Layout,
+    ClipboardList,
+    Users,
+    LogOut
+} from 'lucide-react';
+import { useLogout } from '@/hooks/useLogout';
 
 type ProjectManagerNavbarProps = {
     onNewMission: () => void;
@@ -8,6 +17,8 @@ type ProjectManagerNavbarProps = {
 };
 
 export const ProjectManagerNavbar = ({ onNewMission, isModalOpen }: ProjectManagerNavbarProps) => {
+    const { logout, isLoading } = useLogout();
+
     if (isModalOpen) return null;
 
     return (
@@ -69,6 +80,19 @@ export const ProjectManagerNavbar = ({ onNewMission, isModalOpen }: ProjectManag
                                 </button>
                             </li>
                         </ul>
+                    </div>
+
+                    {/* Bouton de déconnexion */}
+                    <div className="flex items-center">
+                        <button
+                            onClick={logout}
+                            disabled={isLoading}
+                            className="flex items-center gap-2 text-gray-300 hover:text-red-500 transition-colors 
+                                       bg-red-500/10 hover:bg-red-500/20 px-4 py-2 rounded-lg"
+                        >
+                            <LogOut className="h-5 w-5" />
+                            <span>{isLoading ? 'Déconnexion...' : 'Déconnexion'}</span>
+                        </button>
                     </div>
                 </div>
             </nav>

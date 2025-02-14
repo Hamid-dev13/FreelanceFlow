@@ -3,10 +3,12 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, FolderKanban, Layout } from 'lucide-react';
+import { LayoutDashboard, FolderKanban, Layout, LogOut } from 'lucide-react';
+import { useLogout } from '@/hooks/useLogout';
 
 export const DeveloperNavbar = () => {
   const pathname = usePathname();
+  const { logout, isLoading } = useLogout();
 
   return (
     <header className="sticky top-0 z-10 bg-gray-900/50 backdrop-blur-lg border-b border-gray-800">
@@ -22,9 +24,6 @@ export const DeveloperNavbar = () => {
             {/* Navigation */}
             <ul className="flex items-center space-x-8">
               <li>
-
-              </li>
-              <li>
                 <Link
                   href="/mission"
                   className={`flex items-center gap-2 transition-colors ${pathname === '/missions'
@@ -37,6 +36,19 @@ export const DeveloperNavbar = () => {
                 </Link>
               </li>
             </ul>
+          </div>
+
+          {/* Bouton de déconnexion */}
+          <div className="flex items-center">
+            <button
+              onClick={logout}
+              disabled={isLoading}
+              className="flex items-center gap-2 text-gray-300 hover:text-red-500 transition-colors 
+                                       bg-red-500/10 hover:bg-red-500/20 px-4 py-2 rounded-lg"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>{isLoading ? 'Déconnexion...' : 'Déconnexion'}</span>
+            </button>
           </div>
         </div>
       </nav>

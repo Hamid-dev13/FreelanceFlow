@@ -1,10 +1,11 @@
 "use client";
-
-import React, { useState, type ReactNode } from 'react';
+import React, { useState, type ReactNode, useEffect } from 'react';
 import { ClipboardList } from 'lucide-react';
+import { jwtDecode } from 'jwt-decode';
 import MissionForm from '@/components/features/mission/MissionForm';
-import { ProjectManagerNavbar } from '@/app/(dashboard)/_components/navigation/navbar/ProjectManagerNavbar'; // Assurez-vous du bon chemin d'import
+import { ProjectManagerNavbar } from '@/app/(dashboard)/_components/navigation/navbar/ProjectManagerNavbar';
 import { useMissionStore, type CreateMissionData } from '@/stores/useMissionStore';
+import { useSyncSession } from '@/hooks/useSyncSession'; // Importer le hook
 
 interface ProjectManagerLayoutProps {
     children: ReactNode;
@@ -13,6 +14,42 @@ interface ProjectManagerLayoutProps {
 export const ProjectManagerLayout = ({ children }: ProjectManagerLayoutProps) => {
     const [isModalOpen, setIsModalOpen] = useState(false);
     const { createMission } = useMissionStore();
+
+    // Ajouter le hook de synchronisation de session
+    useSyncSession();
+
+    // Ajout d'un useEffect pour logger le rôle
+    useEffect(() => {
+        const token = localStorage.getItem("token");
+        const storedRole = document.cookie
+            .split('; ')
+            .find(row => row.startsWith('user_role='))
+            ?.split('=')[1];
+
+        console.log("🕵️ ProjectManagerLayout - Token présent:", !!token);
+        console.log("🍪 ProjectManagerLayout - Rôle stocké:", storedRole);
+
+        if (token) {
+            try {
+                const decoded = jwtDecode(token) as { role: string, email: string };
+
+                console.log("🔐 ProjectManagerLayout - Rôle connecté:", decoded.role);
+                console.log("📧 ProjectManagerLayout - Email connecté:", decoded.email);
+                console.log("🍪 DEBUG - Comparaison des rôles:",
+                    `Décodé: ${decoded.role}, Stocké: ${storedRole}`
+                );
+
+                // Vérification croisée des rôles
+                if (storedRole && decoded.role !== storedRole) {
+                    console.warn("⚠️ ALERTE : Incohérence de rôle détectée dans ProjectManagerLayout");
+                    localStorage.removeItem("token");
+                    window.location.href = '/login'; // Redirection directe
+                }
+            } catch (error) {
+                console.error("❌ Erreur de décodage du token:", error);
+            }
+        }
+    }, []);
 
     const handleMissionSubmit = async (data: CreateMissionData) => {
         try {
@@ -25,7 +62,6 @@ export const ProjectManagerLayout = ({ children }: ProjectManagerLayoutProps) =>
 
     return (
         <div className="relative min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-            {/* Remplacez la navigation inline par le composant ProjectManagerNavbar */}
             <ProjectManagerNavbar
                 onNewMission={() => setIsModalOpen(true)}
                 isModalOpen={isModalOpen}
@@ -35,7 +71,6 @@ export const ProjectManagerLayout = ({ children }: ProjectManagerLayoutProps) =>
                 {children}
             </main>
 
-            {/* Modale */}
             {isModalOpen && (
                 <MissionForm
                     onClose={() => setIsModalOpen(false)}

@@ -1,4 +1,3 @@
-// src/app/api/auth/login/route.ts
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import bcrypt from "bcryptjs";
@@ -33,13 +32,6 @@ export async function POST(req: Request) {
             role: user.role as 'DEVELOPER' | 'PROJECT_MANAGER',
             type: 'access'
         }, '15m');
-        console.log("Token généré:", accessToken); // Ajout de ce log
-        console.log("DEBUG - Payload:", {
-            userId: user.id,
-            email: user.email,
-            role: user.role,
-            type: 'access'
-        }); // Debug
 
         // Refresh Token (longue durée)
         const refreshToken = await signJWT({
@@ -67,8 +59,17 @@ export async function POST(req: Request) {
             maxAge: 30 * 24 * 60 * 60 // 30 jours en secondes
         });
 
-        return response;
+        // NOUVEAU : Ajouter le rôle comme cookie sécurisé
+        response.cookies.set({
+            name: 'user_role',
+            value: user.role,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: 30 * 24 * 60 * 60 // 30 jours en secondes
+        });
 
+        return response;
     } catch (error) {
         console.error("Erreur login:", error);
         return NextResponse.json(

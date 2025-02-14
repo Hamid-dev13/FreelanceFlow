@@ -1,7 +1,5 @@
 "use client";
-import AddClientModal from '@/components/features/ui/addClientModal';
-import EditClientModal from '@/components/features/ui/EditClientModal';
-import DeleteClientModal from '@/components/features/ui/DeleteClientModal';
+
 import { useState, useEffect } from "react";
 import {
     UserPlus,
@@ -14,65 +12,45 @@ import {
     AlertCircle,
     Loader2
 } from 'lucide-react';
-
-type Client = {
-    id: string;
-    name: string;
-    email: string;
-    phone?: string;
-    createdAt: string;
-    updatedAt: string;
-};
+import { useClientStore } from '@/stores/useClientStore';
+import AddClientModal from '@/components/features/ui/addClientModal';
+import EditClientModal from '@/components/features/ui/EditClientModal';
+import DeleteClientModal from '@/components/features/ui/DeleteClientModal';
+import type { Client } from '@/stores/useClientStore';
 
 export default function ClientsPage() {
-    const [clients, setClients] = useState<Client[]>([]);
+    const {
+        clients,
+        loading,
+        error,
+        fetchClients,
+        deleteClient
+    } = useClientStore();
+
     const [isAddClientModalOpen, setIsAddClientModalOpen] = useState(false);
     const [selectedClient, setSelectedClient] = useState<Client | null>(null);
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
-    const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState("");
+
+    const shouldShowLoader = loading === 'pending' && clients.length === 0;
+
+    useEffect(() => {
+        if (clients.length === 0 || loading === 'idle') {
+            fetchClients();
+        }
+    }, [fetchClients, clients.length, loading]);
 
     const handleDeleteClient = async () => {
         if (!clientToDelete) return;
-
-        const token = localStorage.getItem("token");
         try {
-            const res = await fetch(`/api/clients/${clientToDelete.id}`, {
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            if (res.ok) {
-                fetchClients();
-                setIsDeleteModalOpen(false);
-            }
+            await deleteClient(clientToDelete.id);
+            setIsDeleteModalOpen(false);
         } catch (error) {
-            console.error("Erreur:", error);
+            console.error("Erreur lors de la suppression:", error);
         }
     };
-
-    const fetchClients = async () => {
-        const token = localStorage.getItem("token");
-        try {
-            const res = await fetch("/api/clients", {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setClients(data);
-            }
-        } catch (error) {
-            console.error("Erreur lors du chargement des clients:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    useEffect(() => {
-        fetchClients();
-    }, []);
 
     const filteredClients = clients.filter(client =>
         client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -80,7 +58,7 @@ export default function ClientsPage() {
         (client.phone && client.phone.includes(searchQuery))
     );
 
-    if (loading) {
+    if (shouldShowLoader) {
         return (
             <div className="min-h-[400px] bg-gray-900 rounded-xl shadow-lg border border-gray-800 flex items-center justify-center">
                 <div className="flex flex-col items-center gap-4 text-[#FF4405]">
@@ -90,6 +68,21 @@ export default function ClientsPage() {
                         <span>Chargement des clients...</span>
                     </div>
                 </div>
+            </div>
+        );
+    }
+
+    if (loading === 'failed' && error) {
+        return (
+            <div className="flex flex-col items-center justify-center h-96 text-center">
+                <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
+                <p className="text-red-500">{error}</p>
+                <button
+                    onClick={() => fetchClients()}
+                    className="mt-4 px-4 py-2 bg-[#FF4405] hover:bg-[#ff5c26] text-white rounded-lg"
+                >
+                    Réessayer
+                </button>
             </div>
         );
     }
@@ -259,8 +252,7 @@ export default function ClientsPage() {
             </div>
 
             {/* Modals */}
-            <div className="fixed inset-0 flex items-center justify-center z-50"
-                style={{ display: isAddClientModalOpen || isEditModalOpen || isDeleteModalOpen ? 'flex' : 'none' }}>
+            <>
                 <AddClientModal
                     isOpen={isAddClientModalOpen}
                     onClose={() => {
@@ -280,7 +272,7 @@ export default function ClientsPage() {
                     onConfirm={handleDeleteClient}
                     clientName={clientToDelete?.name || ""}
                 />
-            </div>
+            </>
         </div>
     );
 }

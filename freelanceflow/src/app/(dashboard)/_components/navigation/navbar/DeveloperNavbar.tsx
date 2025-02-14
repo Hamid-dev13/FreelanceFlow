@@ -22,23 +22,14 @@ export const DeveloperNavbar = () => {
             {/* Navigation */}
             <ul className="flex items-center space-x-8">
               <li>
-                <Link
-                  href="/dashboard"
-                  className={`flex items-center gap-2 transition-colors ${pathname === '/dashboard'
-                      ? 'text-[#FF4405]'
-                      : 'text-gray-300 hover:text-[#FF4405]'
-                    }`}
-                >
-                  <LayoutDashboard className="h-5 w-5" />
-                  <span>Dashboard</span>
-                </Link>
+
               </li>
               <li>
                 <Link
                   href="/mission"
                   className={`flex items-center gap-2 transition-colors ${pathname === '/missions'
-                      ? 'text-[#FF4405]'
-                      : 'text-gray-300 hover:text-[#FF4405]'
+                    ? 'text-[#FF4405]'
+                    : 'text-gray-300 hover:text-[#FF4405]'
                     }`}
                 >
                   <FolderKanban className="h-5 w-5" />

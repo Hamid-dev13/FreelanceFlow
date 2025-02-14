@@ -21,8 +21,12 @@ type Project = {
         name: string;
     };
 };
-
-
+type ProjectSectionProps = {
+    project: Project;
+    missions: Mission[];
+    onStatusChange: (mission: Mission, newStatus: MissionStatus) => Promise<void>;
+    updatingId: string | null;
+};
 type ProjectGroup = {
     project: Project;
     missions: Mission[];
@@ -98,89 +102,120 @@ const MissionCard = ({ mission, onStatusChange, updatingId }: {
     mission: Mission,
     onStatusChange: (mission: Mission, newStatus: MissionStatus) => Promise<void>,
     updatingId: string | null
-}) => (
-    <div className="group relative overflow-hidden transition-all duration-300 hover:transform hover:scale-[1.02]">
-        <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl" />
-        <div className="relative p-6 bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-gray-800/50 transition-all duration-300 group-hover:border-primary/50 h-full">
-            <DropdownMenu>
-                <DropdownMenuTrigger
-                    className="absolute top-4 right-4 focus:outline-none"
-                    disabled={updatingId === mission.id}
-                >
-                    <StatusBadge
-                        status={mission.status}
-                        isUpdating={updatingId === mission.id}
-                    />
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                    align="end"
-                    className="w-48 bg-gray-900 border border-gray-800"
-                >
-                    <DropdownMenuItem
-                        onClick={() => onStatusChange(mission, 'IN_PROGRESS')}
-                        className="flex items-center gap-2 focus:bg-gray-800 hover:bg-gray-800 text-gray-200"
-                        disabled={mission.status === 'IN_PROGRESS'}
-                    >
-                        <Clock className="w-4 h-4" />
-                        <span>En cours</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem
-                        onClick={() => onStatusChange(mission, 'COMPLETED')}
-                        className="flex items-center gap-2 focus:bg-gray-800 hover:bg-gray-800 text-gray-200"
-                        disabled={mission.status === 'COMPLETED'}
-                    >
-                        <CheckCircle className="w-4 h-4" />
-                        <span>Terminé</span>
-                    </DropdownMenuItem>
-                </DropdownMenuContent>
-            </DropdownMenu>
+}) => {
+    // Vérification de sécurité pour le title
+    const safeTitle = mission.title || 'Sans titre';
 
-            <div className="space-y-4">
-                <h2 className="text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent pr-24">
-                    {mission.title}
-                </h2>
-                <p className="text-gray-400 line-clamp-2">
-                    {mission.description || 'Aucune description'}
-                </p>
-                <div className="pt-4 border-t border-gray-800/50">
-                    <div className="flex items-center text-sm text-gray-400">
-                        <Calendar className="w-4 h-4 mr-2 text-primary" />
-                        Échéance : {new Date(mission.deadline).toLocaleDateString('fr-FR', {
-                            year: 'numeric',
-                            month: 'long',
-                            day: 'numeric'
-                        })}
-                    </div>
-                    {mission.assignedTo && (
-                        <div className="mt-2 text-sm text-gray-400">
-                            Assigné à : {mission.assignedTo.name}
+    // Formater la date en toute sécurité
+    const formatDate = (dateString: string) => {
+        try {
+            return new Date(dateString).toLocaleDateString('fr-FR', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return 'Date invalide';
+        }
+    };
+
+    return (
+        <div className="group relative overflow-hidden transition-all duration-300 hover:transform hover:scale-[1.02]">
+            <div className="absolute inset-0 bg-gradient-to-r from-primary/10 to-secondary/10 rounded-2xl" />
+            <div className="relative p-6 bg-gray-900/90 backdrop-blur-xl rounded-2xl border border-gray-800/50 transition-all duration-300 group-hover:border-primary/50 h-full">
+                <DropdownMenu>
+                    <DropdownMenuTrigger
+                        className="absolute top-4 right-4 focus:outline-none"
+                        disabled={updatingId === mission.id}
+                    >
+                        <StatusBadge
+                            status={mission.status}
+                            isUpdating={updatingId === mission.id}
+                        />
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent
+                        align="end"
+                        className="w-48 bg-gray-900 border border-gray-800"
+                    >
+                        <DropdownMenuItem
+                            onClick={() => onStatusChange(mission, 'IN_PROGRESS')}
+                            className="flex items-center gap-2 focus:bg-gray-800 hover:bg-gray-800 text-gray-200"
+                            disabled={mission.status === 'IN_PROGRESS'}
+                        >
+                            <Clock className="w-4 h-4" />
+                            <span>En cours</span>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                            onClick={() => onStatusChange(mission, 'COMPLETED')}
+                            className="flex items-center gap-2 focus:bg-gray-800 hover:bg-gray-800 text-gray-200"
+                            disabled={mission.status === 'COMPLETED'}
+                        >
+                            <CheckCircle className="w-4 h-4" />
+                            <span>Terminé</span>
+                        </DropdownMenuItem>
+                    </DropdownMenuContent>
+                </DropdownMenu>
+
+                <div className="space-y-4">
+                    <h2 className="text-xl font-semibold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent pr-24">
+                        {safeTitle}
+                    </h2>
+                    <p className="text-gray-400 line-clamp-2">
+                        {mission.description || 'Aucune description'}
+                    </p>
+                    <div className="pt-4 border-t border-gray-800/50">
+                        <div className="flex items-center text-sm text-gray-400">
+                            <Calendar className="w-4 h-4 mr-2 text-primary" />
+                            Échéance : {formatDate(mission.deadline)}
                         </div>
-                    )}
+                        {mission.assignedTo && (
+                            <div className="mt-2 text-sm text-gray-400">
+                                Assigné à : {mission.assignedTo.name}
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
-const ProjectSection = ({ project, missions, onStatusChange, updatingId }: {
-    project: Project,
-    missions: Mission[],
-    onStatusChange: (mission: Mission, newStatus: MissionStatus) => Promise<void>,
-    updatingId: string | null
-}) => {
-    const [isExpanded, setIsExpanded] = useState(true);
-    console.log(project);
+// Types
+
+// Composant ProjectSection séparé avec état persistant
+const ProjectSection = ({ project, missions, onStatusChange, updatingId }: ProjectSectionProps) => {
+    const [isExpanded, setIsExpanded] = useState(false);
+
+    useEffect(() => {
+        const savedState = localStorage.getItem(`project-${project.id}-expanded`);
+        if (savedState) {
+            setIsExpanded(savedState === 'true');
+        }
+    }, [project.id]);
+
+    const toggleExpand = () => {
+        const newState = !isExpanded;
+        setIsExpanded(newState);
+        localStorage.setItem(`project-${project.id}-expanded`, String(newState));
+    };
+
     return (
         <div className="space-y-4">
             <div
-                onClick={() => setIsExpanded(!isExpanded)}
+                onClick={toggleExpand}
                 className="flex items-center justify-between p-4 bg-gray-900/90 backdrop-blur-xl rounded-xl border border-gray-800/50 cursor-pointer transition-all duration-300 hover:border-primary/50"
             >
                 <div className="flex items-center gap-3">
                     <Briefcase className="w-5 h-5 text-primary" />
-                    <span className="font-medium text-white">
-                        {project.title}
-                    </span>
+                    <div>
+                        <span className="font-medium text-white">
+                            {project.title}
+                        </span>
+                        <div className="text-sm text-gray-400">
+                            {missions.length} mission{missions.length > 1 ? 's' : ''}
+                            {project.client && ` - Client: ${project.client.name}`}
+                        </div>
+                    </div>
                 </div>
                 {isExpanded ?
                     <ChevronDown className="w-5 h-5 text-gray-400" /> :
@@ -209,9 +244,17 @@ function ProjectManagerMissionsContent() {
     const [updatingId, setUpdatingId] = useState<string | null>(null);
 
     useEffect(() => {
-        fetchMissions('PROJECT_MANAGER').catch(console.error);
+        const fetchData = async () => {
+            try {
+                await fetchMissions('PROJECT_MANAGER');
+            } catch (error) {
+                console.error('Error fetching missions:', error);
+            }
+        };
+
+        fetchData();
         const stopRefresh = startAutoRefresh('PROJECT_MANAGER');
-        return () => stopRefresh();
+        return stopRefresh;
     }, [fetchMissions, startAutoRefresh]);
 
     const handleStatusChange = async (mission: Mission, newStatus: MissionStatus) => {
@@ -221,7 +264,7 @@ function ProjectManagerMissionsContent() {
         try {
             await updateMissionStatus(mission.id, newStatus);
         } catch (error) {
-            console.error('Erreur lors de la mise à jour:', error);
+            console.error('Error updating status:', error);
         } finally {
             setUpdatingId(null);
         }
@@ -231,19 +274,25 @@ function ProjectManagerMissionsContent() {
         if (!mission.project) return acc;
 
         const projectId = mission.project.id;
+
         if (!acc[projectId]) {
+            const projectData: Project = {
+                id: mission.project.id,
+                title: mission.project.title || 'Projet sans titre',
+                description: mission.project.description ?? undefined,
+                status: mission.project.status,
+                startDate: mission.project.startDate,
+                endDate: mission.project.endDate ?? undefined,
+                clientId: mission.project.clientId,
+                client: mission.project.client
+            };
+
             acc[projectId] = {
-                project: {
-                    id: mission.project.id,
-                    title: mission.project.title || 'Projet sans nom',
-                    status: mission.project.status,
-                    startDate: mission.project.startDate,
-                    clientId: mission.project.clientId,
-                    client: mission.project.client
-                },
+                project: projectData,
                 missions: []
             };
         }
+
         acc[projectId].missions.push(mission);
         return acc;
     }, {});

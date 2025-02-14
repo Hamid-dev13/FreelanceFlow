@@ -33,6 +33,7 @@ export async function GET(request: NextRequest) {
             ? { createdById: decoded.userId }  // Project Manager voit ses missions créées
             : { assignedToId: decoded.userId }; // Developer voit ses missions assignées
 
+        // Dans route.ts
         const missions = await prisma.mission.findMany({
             where: whereCondition,
             include: {
@@ -53,7 +54,19 @@ export async function GET(request: NextRequest) {
                 project: {
                     select: {
                         id: true,
-                        status: true
+                        title: true,         // Correspond au schéma Prisma
+                        description: true,
+                        status: true,
+                        startDate: true,     // Ajouté depuis le schéma
+                        endDate: true,       // Ajouté depuis le schéma
+                        clientId: true,
+                        client: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
                     }
                 }
             },
@@ -61,6 +74,9 @@ export async function GET(request: NextRequest) {
                 createdAt: 'desc'
             }
         });
+
+        // Log pour debug
+        console.log('Première mission:', JSON.stringify(missions[0], null, 2));
 
         return NextResponse.json(missions);
     } catch (error) {
@@ -104,8 +120,8 @@ export async function POST(request: NextRequest) {
         const newMission = await prisma.mission.create({
             data: {
                 ...formattedMissionData,
-                createdById: decoded.userId, // Utiliser l'ID de l'utilisateur connecté
-                status: 'PENDING', // Statut initial par défaut
+                createdById: decoded.userId,
+                status: 'PENDING',
                 createdAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             },
@@ -127,13 +143,20 @@ export async function POST(request: NextRequest) {
                 project: {
                     select: {
                         id: true,
-
-                        status: true
+                        title: true,
+                        status: true,
+                        description: true,
+                        client: {
+                            select: {
+                                id: true,
+                                name: true,
+                                email: true
+                            }
+                        }
                     }
                 }
             }
         });
-
         return NextResponse.json(newMission);
     } catch (error) {
         console.error('Erreur lors de la création de la mission:', error);

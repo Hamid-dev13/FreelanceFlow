@@ -26,7 +26,7 @@ export async function GET() {
             },
             orderBy: { createdAt: 'desc' }
         });
-        console.log(projects);
+
         return NextResponse.json(projects);
     } catch (error) {
         return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });

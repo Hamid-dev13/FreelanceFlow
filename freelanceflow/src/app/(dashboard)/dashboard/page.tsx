@@ -7,11 +7,12 @@ import DeveloperDashboard from '@/app/(dashboard)/dashboard/_components/Develope
 import DashboardLoading from '@/app/(dashboard)/dashboard/_components/shared/DashboardLoading';
 
 interface DashboardProps {
-    params: {};
-    searchParams: {};
+    params: { id: string };  // or whatever the params should be
+    searchParams: { filter: string }; // adjust this based on actual structure
 }
 
-export default function DashboardPage(props: DashboardProps) {
+
+export default function DashboardPage(_props: DashboardProps) {
     const { role, loading } = useDashboardData();
 
     console.log("Current role:", role);

@@ -6,11 +6,8 @@ import ProjectManagerDashboard from '@/app/(dashboard)/dashboard/_components/Pro
 import DeveloperDashboard from '@/app/(dashboard)/dashboard/_components/DeveloperDashboard';
 import DashboardLoading from '@/app/(dashboard)/dashboard/_components/shared/DashboardLoading';
 
-// If you're not using the props, you can use the Page type without params
 export default function DashboardPage() {
     const { role, loading } = useDashboardData();
-
-    console.log("Current role:", role);
 
     if (loading) {
         return <DashboardLoading />;
@@ -18,10 +15,8 @@ export default function DashboardPage() {
 
     switch (role) {
         case 'PROJECT_MANAGER':
-            console.log("Rendering Project Manager Dashboard");
             return <ProjectManagerDashboard />;
         case 'DEVELOPER':
-            console.log("Rendering Developer Dashboard");
             return <DeveloperDashboard />;
         default:
             return <div>Accès non autorisé</div>;

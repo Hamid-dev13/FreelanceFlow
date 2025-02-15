@@ -1,3 +1,4 @@
+// src/app/(dashboard)/dashboard/DashboardClient.tsx
 'use client';
 
 import React from 'react';

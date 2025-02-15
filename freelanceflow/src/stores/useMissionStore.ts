@@ -5,7 +5,14 @@ import { createJSONStorage, StateStorage } from 'zustand/middleware';
 // Types
 export type MissionStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 export type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
-
+export type CreateMissionData = {
+    title: string;
+    description: string | null;
+    deadline: string;
+    projectId: string | null;
+    assignedToId: string | null;
+    status?: MissionStatus;
+};
 export type Mission = {
     id: string;
     title: string;

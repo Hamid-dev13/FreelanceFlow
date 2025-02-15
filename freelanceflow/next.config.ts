@@ -13,6 +13,8 @@ const config: NextConfig = {
   eslint: {
     ignoreDuringBuilds: true,
   },
+  // Utiliser SWC
+  swcMinify: true,
 }
 
 export default config;

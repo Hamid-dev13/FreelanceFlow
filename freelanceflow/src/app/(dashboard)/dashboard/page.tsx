@@ -6,13 +6,8 @@ import ProjectManagerDashboard from '@/app/(dashboard)/dashboard/_components/Pro
 import DeveloperDashboard from '@/app/(dashboard)/dashboard/_components/DeveloperDashboard';
 import DashboardLoading from '@/app/(dashboard)/dashboard/_components/shared/DashboardLoading';
 
-interface DashboardProps {
-    params: { id: string };  // or whatever the params should be
-    searchParams: { filter: string }; // adjust this based on actual structure
-}
-
-
-export default function DashboardPage(_props: DashboardProps) {
+// If you're not using the props, you can use the Page type without params
+export default function DashboardPage() {
     const { role, loading } = useDashboardData();
 
     console.log("Current role:", role);

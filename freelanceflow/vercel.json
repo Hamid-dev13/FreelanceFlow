@@ -3,5 +3,9 @@
         "env": {
             "VERCEL_FORCE_NO_BUILD_CACHE": "1"
         }
-    }
+    },
+    "buildCommand": "npm run vercel-build",
+    "outputDirectory": ".next",
+    "devCommand": "npm run dev",
+    "installCommand": "npm install"
 }

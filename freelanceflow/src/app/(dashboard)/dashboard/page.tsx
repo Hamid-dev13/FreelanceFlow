@@ -1,4 +1,4 @@
-"use client";
+'use client';
 
 import React from 'react';
 import { useDashboardData } from '@/hooks/useDashboardData';
@@ -6,7 +6,12 @@ import ProjectManagerDashboard from '@/app/(dashboard)/dashboard/_components/Pro
 import DeveloperDashboard from '@/app/(dashboard)/dashboard/_components/DeveloperDashboard';
 import DashboardLoading from '@/app/(dashboard)/dashboard/_components/shared/DashboardLoading';
 
-export default function DashboardPage() {
+interface DashboardProps {
+    params: {};
+    searchParams: {};
+}
+
+export default function DashboardPage(props: DashboardProps) {
     const { role, loading } = useDashboardData();
 
     console.log("Current role:", role);

@@ -1,14 +1,17 @@
 "use client";
 
+import React from 'react'; // Ajoutez cet import
 import { useDashboardData } from '@/hooks/useDashboardData';
 import ProjectManagerDashboard from '@/app/(dashboard)/dashboard/_components/ProjectManagerDashoard';
 import DeveloperDashboard from '@/app/(dashboard)/dashboard/_components/DeveloperDashboard';
 import DashboardLoading from '@/app/(dashboard)/dashboard/_components/shared/DashboardLoading';
 
-export default function DashboardPage() {
+// Supprimez toute définition de DashboardPageProps si elle existe ailleurs
+
+export default function DashboardPage(): React.JSX.Element {
     const { role, loading } = useDashboardData();
 
-    console.log("Current role:", role); // Ajoutez ce log
+    console.log("Current role:", role);
 
     if (loading) {
         return <DashboardLoading />;

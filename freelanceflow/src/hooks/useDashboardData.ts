@@ -1,38 +1,38 @@
+// hooks/useDashboardData.ts
+"use client";
+
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { jwtDecode } from 'jwt-decode';
 
 type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
-type TokenPayload = { role: UserRole };
 
-
-
-
-export function useDashboardData() {
-    const router = useRouter();
+export const useDashboardData = () => {
     const [role, setRole] = useState<UserRole | null>(null);
     const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
+        const verifyAuth = async () => {
+            try {
+                const response = await fetch('/api/auth/verify');
 
-        if (!token) {
-            router.push("/login");
-            return;
-        }
+                if (!response.ok) {
+                    router.push('/login');
+                    return;
+                }
 
-        try {
-            const decoded = jwtDecode(token) as TokenPayload;
-            console.log("Role extrait du token:", decoded.role); // Ajout de log
-            setRole(decoded.role);
-        } catch (error) {
-            console.error("Erreur de décodage du token:", error);
-            localStorage.removeItem("token");
-            router.push("/login");
-        } finally {
-            setLoading(false);
-        }
+                const data = await response.json();
+                setRole(data.role);
+            } catch (error) {
+                console.error('Erreur de vérification:', error);
+                router.push('/login');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        verifyAuth();
     }, [router]);
 
     return { role, loading };
-}
+};

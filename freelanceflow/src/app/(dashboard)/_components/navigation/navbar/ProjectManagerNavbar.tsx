@@ -25,7 +25,7 @@ export const ProjectManagerNavbar = ({ onNewMission, isModalOpen }: ProjectManag
                         <ul className="flex items-center space-x-8">
                             <li>
                                 <Link
-                                    href="/dashboard"
+                                    href="/dashboard/project-manager"
                                     className="flex items-center gap-2 text-gray-300 hover:text-[#FF4405] transition-colors"
                                 >
                                     <LayoutDashboard className="h-5 w-5" />

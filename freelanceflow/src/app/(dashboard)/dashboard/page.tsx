@@ -1,27 +1,53 @@
+// src/app/(dashboard)/layout.tsx
 "use client";
 
-import { useDashboardData } from '@/hooks/useDashboardData';
-import ProjectManagerDashboard from '@/app/(dashboard)/dashboard/_components/ProjectManagerDashoard';
-import DeveloperDashboard from '@/app/(dashboard)/dashboard/_components/DeveloperDashboard';
-import DashboardLoading from '@/app/(dashboard)/dashboard/_components/shared/DashboardLoading';
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { DeveloperLayout } from '@/app/(dashboard)/_components/layouts/developer-layout';
+import { ProjectManagerLayout } from '@/app/(dashboard)/_components/layouts/project-manager-layout';
 
-export default function DashboardPage() {
-    const { role, loading } = useDashboardData();
+type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
 
-    console.log("Current role:", role); // Ajoutez ce log
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
+    const [role, setRole] = useState<UserRole | null>(null);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
+
+    useEffect(() => {
+        const verifyToken = async () => {
+            try {
+                const response = await fetch('/api/auth/verify', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    throw new Error('Verification failed');
+                }
+
+                const data = await response.json();
+                console.log("Données de vérification:", data);
+                setRole(data.role);
+                setLoading(false);
+            } catch (error) {
+                console.error('Erreur de vérification:', error);
+                router.push('/login');
+            }
+        };
+
+        verifyToken();
+    }, [router]);
 
     if (loading) {
-        return <DashboardLoading />;
+        return <div>Chargement...</div>;
     }
 
+    // Retourner le layout approprié en fonction du rôle
     switch (role) {
-        case 'PROJECT_MANAGER':
-            console.log("Rendering Project Manager Dashboard");
-            return <ProjectManagerDashboard />;
         case 'DEVELOPER':
-            console.log("Rendering Developer Dashboard");
-            return <DeveloperDashboard />;
+            return <DeveloperLayout>{children}</DeveloperLayout>;
+        case 'PROJECT_MANAGER':
+            return <ProjectManagerLayout>{children}</ProjectManagerLayout>;
         default:
-            return <div>Accès non autorisé</div>;
+            return null; // Redirection vers login gérée dans useEffect
     }
 }

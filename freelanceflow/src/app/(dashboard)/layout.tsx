@@ -1,58 +1,58 @@
+// src/app/(dashboard)/layout.tsx
 "use client";
 
-import { jwtDecode } from "jwt-decode";
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ProjectManagerLayout } from '@/app/(dashboard)/_components';
-import { DeveloperLayout } from '@/app/(dashboard)/_components/';
-import { Layout } from "lucide-react";
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import DashboardLoading from '@/app/(dashboard)/dashboard/_components/shared/DashboardLoading'; // Ajustez le chemin selon votre structure
+
 type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
 
-export default function DashboardLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
-    const router = useRouter();
-    const [loading, setLoading] = useState(true);
-    const [sidebarOpen, setSidebarOpen] = useState(false);
-    const [pageLoaded, setPageLoaded] = useState(false);
+export default function DashboardLayout({ children }: { children: React.ReactNode }) {
     const [role, setRole] = useState<UserRole | null>(null);
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
     useEffect(() => {
-        const token = localStorage.getItem("token");
-        if (!token) {
-            router.push("/login");
-        } else {
+        const verifyToken = async () => {
             try {
-                const decoded = jwtDecode(token) as { role: UserRole };
-                setRole(decoded.role);
+                const response = await fetch('/api/auth/verify', {
+                    credentials: 'include'
+                });
+
+                if (!response.ok) {
+                    setRole(null);
+                    setLoading(false);
+                    return;
+                }
+
+                const data = await response.json();
+                setRole(data.role);
                 setLoading(false);
             } catch (error) {
-                console.error("Erreur de décodage du token:", error);
-                localStorage.removeItem("token");
-                router.push("/login");
+                console.error('Erreur de vérification:', error);
+                setRole(null);
+                setLoading(false);
             }
+        };
+
+        verifyToken();
+    }, []);
+
+    // Effet séparé pour la redirection
+    useEffect(() => {
+        if (!loading && !role) {
+            router.push('/login');
         }
-    }, [router]);
+    }, [loading, role, router]);
 
     if (loading) {
-        return (
-            <div className="min-h-screen bg-black flex items-center justify-center p-4">
-                <div className="flex flex-col items-center gap-4 text-[#FF4405]">
-                    <Layout className="h-12 w-12 animate-pulse" />
-                    <div className="flex items-center gap-2">
-                        <span className="text-sm sm:text-base animate-pulse">Chargement...</span>
-                    </div>
-                </div>
-            </div>
-        );
+        return <DashboardLoading />; // Ou votre composant de chargement
     }
-    return role === 'PROJECT_MANAGER' ? (
-        <ProjectManagerLayout>
-            {children} {/* S'assurer que children est toujours passé ici */}
-        </ProjectManagerLayout>
-    ) : (
-        <DeveloperLayout>{children}</DeveloperLayout>
-    );
+
+    // Si pas de rôle mais en chargement, on montre le loading
+    if (!role) {
+        return null; // On retourne null pendant que la redirection se fait
+    }
+
+    return <>{children}</>;
 }

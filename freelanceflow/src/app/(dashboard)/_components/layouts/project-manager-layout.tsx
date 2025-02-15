@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, type ReactNode } from 'react';
-import { ClipboardList } from 'lucide-react';
+
 import MissionForm from '@/components/features/mission/MissionForm';
 import { ProjectManagerNavbar } from '@/app/(dashboard)/_components/navigation/navbar/ProjectManagerNavbar'; // Assurez-vous du bon chemin d'import
 import { useMissionStore, type CreateMissionData } from '@/stores/useMissionStore';

@@ -7,8 +7,10 @@ export type MissionStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 export type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
 export type CreateMissionData = {
     title: string;
-    description?: string;
-    // autres champs nécessaires
+    description: string;
+    assignedToId?: string | null;
+    projectId?: string | null;
+    deadline?: string; // Ajout de la propriété deadline
 };
 export type Mission = {
     id: string;

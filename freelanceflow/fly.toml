@@ -1,0 +1,9 @@
+app = "freeflow"
+
+[build]
+  # Paramètres de construction si nécessaire
+
+[env]
+  # Variables d'environnement si nécessaire
+ DATABASE_URL = "postgresql://postgres.ffvmxukyqvqvtfqpdvcs:Vgvfbgfhyh1@aws-0-eu-west-3.pooler.supabase.com:6543/postgres?pgbouncer=true&connection_limit=1&pool_timeout=20"
+  JWT_SECRET = "ff4383e61ab2fe0a40086ac9d2d818187bceb7bdc0284762591f7f7c92465bd1c15321d46f92876f8e08a7e54e4ff933c74b9b29679d9d114a6dac8bf6253ed7"

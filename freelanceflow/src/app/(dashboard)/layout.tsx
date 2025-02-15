@@ -1,9 +1,9 @@
-// src/app/(dashboard)/layout.tsx
 "use client";
 
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import DashboardLoading from '@/app/(dashboard)/dashboard/_components/shared/DashboardLoading'; // Ajustez le chemin selon votre structure
+import { DeveloperLayout } from '@/app/(dashboard)/_components/layouts/developer-layout';
+import { ProjectManagerLayout } from '@/app/(dashboard)/_components/layouts/project-manager-layout';
 
 type UserRole = 'DEVELOPER' | 'PROJECT_MANAGER';
 
@@ -16,7 +16,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         const verifyToken = async () => {
             try {
                 const response = await fetch('/api/auth/verify', {
-                    credentials: 'include'
+                    credentials: 'include',
                 });
 
                 if (!response.ok) {
@@ -45,14 +45,18 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         }
     }, [loading, role, router]);
 
-    if (loading) {
-        return <DashboardLoading />; // Ou votre composant de chargement
-    }
-
     // Si pas de rôle mais en chargement, on montre le loading
-    if (!role) {
-        return null; // On retourne null pendant que la redirection se fait
+    if (loading) {
+        return <div>Chargement...</div>;
     }
 
-    return <>{children}</>;
+    // Retourner le layout approprié en fonction du rôle
+    switch (role) {
+        case 'DEVELOPER':
+            return <DeveloperLayout>{children}</DeveloperLayout>;
+        case 'PROJECT_MANAGER':
+            return <ProjectManagerLayout>{children}</ProjectManagerLayout>;
+        default:
+            return null; // Redirection vers login gérée dans useEffect
+    }
 }

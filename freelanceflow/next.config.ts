@@ -15,6 +15,9 @@ const config: NextConfig = {
   },
   // Utiliser SWC
   swcMinify: true,
-}
+  images: {
+    domains: ['images.unsplash.com'],
+  },
+};
 
 export default config;

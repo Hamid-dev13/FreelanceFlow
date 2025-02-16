@@ -24,12 +24,14 @@ async function verifyAuth() {
     }
 }
 
+type ParamsType = { id: string };
+
 export async function GET(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    context: { params: ParamsType }
 ) {
     try {
-        const { id } = await params;
+        const { id } = context.params;
         console.log("🔵 Récupération du client:", id);
 
         const payload = await verifyAuth();
@@ -58,10 +60,10 @@ export async function GET(
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    context: { params: ParamsType }
 ) {
     try {
-        const { id } = await params;
+        const { id } = context.params;
         console.log("🔵 Modification du client:", id);
 
         const payload = await verifyAuth();
@@ -92,10 +94,10 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: Promise<{ id: string }> }
+    context: { params: ParamsType }
 ) {
     try {
-        const { id } = await params;
+        const { id } = context.params;
         console.log("🔵 Suppression du client:", id);
 
         const payload = await verifyAuth();

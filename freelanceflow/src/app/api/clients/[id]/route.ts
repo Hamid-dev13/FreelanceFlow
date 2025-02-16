@@ -24,25 +24,21 @@ async function verifyAuth() {
     }
 }
 
-interface RouteContext {
-    params: {
-        id: string;
-    };
-}
+type Params = { params: { id: string } }
 
 export async function GET(
     request: NextRequest,
-    context: RouteContext
+    { params }: Params
 ) {
     try {
-        const clientId = context.params.id;
-        console.log("🔵 Récupération du client:", clientId);
+        const { id } = params;
+        console.log("🔵 Récupération du client:", id);
 
         const payload = await verifyAuth();
 
         const client = await prisma.client.findUnique({
             where: {
-                id: clientId,
+                id,
                 userId: payload.userId
             }
         });
@@ -64,18 +60,18 @@ export async function GET(
 
 export async function PUT(
     request: NextRequest,
-    context: RouteContext
+    { params }: Params
 ) {
     try {
-        const clientId = context.params.id;
-        console.log("🔵 Modification du client:", clientId);
+        const { id } = params;
+        console.log("🔵 Modification du client:", id);
 
         const payload = await verifyAuth();
         const { name, email, phone } = await request.json();
 
         const client = await prisma.client.update({
             where: {
-                id: clientId,
+                id,
                 userId: payload.userId
             },
             data: {
@@ -97,18 +93,18 @@ export async function PUT(
 }
 
 export async function DELETE(
-    request: NextRequest,
-    context: RouteContext
+    _request: NextRequest,
+    { params }: Params
 ) {
     try {
-        const clientId = context.params.id;
-        console.log("🔵 Suppression du client:", clientId);
+        const { id } = params;
+        console.log("🔵 Suppression du client:", id);
 
         const payload = await verifyAuth();
 
         await prisma.client.delete({
             where: {
-                id: clientId,
+                id,
                 userId: payload.userId
             }
         });

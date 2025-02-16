@@ -1,3 +1,4 @@
+import { verifyJWT } from '@/features/auth';
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
 import { createJSONStorage, StateStorage } from 'zustand/middleware';
@@ -169,15 +170,21 @@ export const useMissionStore = create<MissionState>()(
                         if (!response.ok) {
                             // Restaurer l'état précédent en cas d'erreur
                             set({ missions: currentMissions });
-                            throw new Error('Failed to update status');
+                            const errorText = await response.text();
+                            throw new Error(`Failed to update mission status: ${errorText}`);
                         }
 
                         // Recharger les missions pour assurer la synchronisation
                         await get().fetchMissions('PROJECT_MANAGER');
                     } catch (error) {
+                        console.error('Full Error in Update Mission Status:', {
+                            errorMessage: error instanceof Error ? error.message : 'Unknown error',
+                            errorStack: error instanceof Error ? error.stack : undefined
+                        });
+
                         // Restaurer l'état précédent en cas d'erreur
                         set({ missions: currentMissions });
-                        console.error('Error updating status:', error);
+                        throw error;
                     }
                 },
 

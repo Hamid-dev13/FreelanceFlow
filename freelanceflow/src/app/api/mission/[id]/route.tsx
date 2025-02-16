@@ -8,7 +8,7 @@ export async function PUT(
     { params }: { params: Promise<{ id: string }> }
 ) {
     // Wait for the params to resolve
-    const { id } = await params; // Get the id from the resolved params
+    const { id } = await params;
 
     if (!id) {
         return NextResponse.json(
@@ -17,7 +17,13 @@ export async function PUT(
         );
     }
 
-    const token = request.headers.get('authorization')?.split('Bearer ')[1];
+    // Vérifier le token dans les en-têtes
+    const headerToken = request.headers.get('authorization')?.split('Bearer ')[1];
+
+    // Vérifier le token dans les cookies
+    const cookieToken = request.cookies.get('auth-token')?.value;
+
+    const token = headerToken || cookieToken;
 
     if (!token) {
         return NextResponse.json(
@@ -36,7 +42,7 @@ export async function PUT(
         // Mettre à jour la mission dans la base de données avec Prisma
         const updatedMission = await prisma.mission.update({
             where: {
-                id: id, // Utiliser l'ID passé dans les params
+                id: id,
             },
             data: {
                 status: body.status,

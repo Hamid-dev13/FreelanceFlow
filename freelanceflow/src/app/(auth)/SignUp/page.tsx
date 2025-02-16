@@ -17,7 +17,7 @@ export default function SignUpPage() {
         email: '',
         password: '',
         confirmPassword: '',
-        role: ''
+        role: 'DEVELOPER',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
@@ -28,15 +28,19 @@ export default function SignUpPage() {
     });
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: value
-        }));
 
+        setFormData(prev => {
+            const updatedData = { ...prev, [name]: value };
+            console.log(updatedData);  // Affichage de l'état mis à jour pour déboguer
+            return updatedData;
+        });
+
+        // Vérification pour le champ 'password' si nécessaire
         if (name === 'password') {
             setPasswordStrength(validatePassword(value));
         }
     };
+
 
     // Fonction de validation
     function validatePassword(password: string) {

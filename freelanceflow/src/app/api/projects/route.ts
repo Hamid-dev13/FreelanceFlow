@@ -1,20 +1,40 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { headers } from "next/headers";
-import ProjectsPage from "@/app/(dashboard)/projects/page";
+import { cookies } from "next/headers";
+import { verifyJWT } from '@/features/auth/services/jwt';
 
-// GET /api/projects - Liste des projets
+// Fonction utilitaire pour la vérification d'authentification
+async function verifyAuth() {
+    console.log("🔍 Vérification de l'authentification");
+
+    const cookieStore = await cookies();
+    const token = cookieStore.get('auth-token');
+
+    if (!token) {
+        console.log("❌ Pas de token trouvé dans les cookies");
+        throw new Error("Non authentifié");
+    }
+
+    try {
+        const payload = await verifyJWT(token.value);
+        console.log("✅ Token vérifié pour l'utilisateur:", payload.userId);
+        return payload;
+    } catch (error) {
+        console.error("❌ Erreur de vérification du token:", error);
+        throw error;
+    }
+}
+
+// GET /api/projects - Liste de tous les projets
 export async function GET() {
     try {
-        const headersList = await headers();
-        const userId = headersList.get("x-user-id");
-
-        if (!userId) {
-            return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-        }
+        console.log("🔵 Récupération des projets");
+        const payload = await verifyAuth();
 
         const projects = await prisma.project.findMany({
-            where: { userId },
+            where: {
+                userId: payload.userId
+            },
             include: {
                 client: {
                     select: {
@@ -27,46 +47,30 @@ export async function GET() {
             orderBy: { createdAt: 'desc' }
         });
 
+        console.log("✅ Projets récupérés:", projects.length);
         return NextResponse.json(projects);
     } catch (error) {
-        return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+        console.error("❌ Erreur GET projects:", error);
+        return NextResponse.json(
+            { error: error instanceof Error ? error.message : "Erreur serveur" },
+            { status: error instanceof Error && error.message === "Non authentifié" ? 401 : 500 }
+        );
     }
-
-
-
 }
 
-// POST /api/projects - Créer un projet
+// POST /api/projects - Créer un nouveau projet
 export async function POST(req: Request) {
     try {
-        const headersList = await headers();
-        const userId = headersList.get("x-user-id");
-
-        if (!userId) {
-            return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
-        }
+        console.log("🔵 Création d'un nouveau projet");
+        const payload = await verifyAuth();
 
         const { title, description, clientId, startDate, endDate, status } = await req.json();
 
         if (!title || !clientId) {
+            console.log("❌ Données manquantes");
             return NextResponse.json(
                 { error: "Titre et client requis" },
                 { status: 400 }
-            );
-        }
-
-        // Vérifier que le client existe et appartient à l'utilisateur
-        const client = await prisma.client.findUnique({
-            where: {
-                id: clientId,
-                userId
-            }
-        });
-
-        if (!client) {
-            return NextResponse.json(
-                { error: "Client non trouvé" },
-                { status: 404 }
             );
         }
 
@@ -78,7 +82,7 @@ export async function POST(req: Request) {
                 endDate,
                 status: status || "EN_COURS",
                 clientId,
-                userId
+                userId: payload.userId
             },
             include: {
                 client: {
@@ -90,11 +94,14 @@ export async function POST(req: Request) {
                 }
             }
         });
-        console.log("Projet créé:", project);
+
+        console.log("✅ Projet créé:", project.id);
         return NextResponse.json(project, { status: 201 });
     } catch (error) {
-        console.error("Erreur création projet:", error);
-        return NextResponse.json({ error: "Erreur serveur" }, { status: 500 });
+        console.error("❌ Erreur POST project:", error);
+        return NextResponse.json(
+            { error: error instanceof Error ? error.message : "Erreur serveur" },
+            { status: error instanceof Error && error.message === "Non authentifié" ? 401 : 500 }
+        );
     }
 }
-

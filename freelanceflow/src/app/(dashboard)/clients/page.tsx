@@ -44,10 +44,12 @@ export default function ClientsPage() {
     const shouldShowLoader = loading === 'pending' && clients.length === 0;
 
     useEffect(() => {
-        if (clients.length === 0 || loading === 'idle') {
-            fetchClients();
+        // Si les clients sont déjà chargés ou si nous sommes déjà en train de charger des données, on ne refait pas la requête
+        if (clients.length === 0 && loading === 'idle') {
+            fetchClients(); // Fetch les clients uniquement si la liste est vide et le chargement est terminé
         }
-    }, [fetchClients, clients.length, loading]);
+    }, [fetchClients, clients.length, loading]);  // Les dépendances restent les mêmes
+
 
     const handleDeleteClient = async () => {
         if (!clientToDelete) return;
@@ -82,10 +84,7 @@ export default function ClientsPage() {
                     <div className="min-h-[400px] bg-gray-900 rounded-xl shadow-lg border border-gray-800 flex items-center justify-center">
                         <div className="flex flex-col items-center gap-4 text-[#FF4405]">
                             <Users className="h-12 w-12 animate-pulse" />
-                            <div className="flex items-center gap-2">
-                                <Loader2 className="h-6 w-6 animate-spin" />
-                                <span>Chargement des clients...</span>
-                            </div>
+
                         </div>
                     </div>
                 </main>

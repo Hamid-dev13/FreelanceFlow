@@ -1,14 +1,11 @@
 "use client";
-
 import { ProjectManagerLayout } from '@/app/(dashboard)/_components/layouts/project-manager-layout'
-
-import ProjectManagerDashboard from '@/app/(dashboard)/dashboard/_components/ProjectManagerDashoard';
-
+import ProjectManagerDashboard from '@/app/(dashboard)/dashboard/_components/ProjectManagerDashboard';
 
 export default function Page() {
     return (
-
-        <ProjectManagerDashboard />
-
+        <ProjectManagerLayout showNavbar={false}>
+            <ProjectManagerDashboard />
+        </ProjectManagerLayout>
     );
 }

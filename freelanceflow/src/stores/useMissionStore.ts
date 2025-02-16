@@ -88,28 +88,37 @@ export const useMissionStore = create<MissionState>()(
             (set, get) => ({
                 missions: [],
                 error: null,
-                isHydrated: false,
                 fetchMissions: async (role: UserRole) => {
                     try {
-                        const token = localStorage.getItem('token');
-                        if (!token) {
-                            throw new Error('Aucun token trouvé');
-                        }
+                        console.log('📡 Début de fetchMissions pour le rôle:', role);
 
                         const response = await fetch('/api/mission', {
                             method: 'GET',
+                            credentials: 'include', // Utilisation des cookies
                             headers: {
-                                'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json',
                             }
                         });
 
+                        console.log('🔍 Détails de la réponse:', {
+                            status: response.status,
+                            statusText: response.statusText,
+                            headers: Object.fromEntries(response.headers.entries())
+                        });
+
                         if (!response.ok) {
-                            throw new Error(`Erreur HTTP: ${response.status}`);
+                            // Récupérer le texte d'erreur pour plus de détails
+                            const errorText = await response.text();
+                            console.error('❌ Erreur de réponse:', {
+                                status: response.status,
+                                errorText: errorText
+                            });
+
+                            throw new Error(`Erreur HTTP: ${response.status} - ${errorText}`);
                         }
 
                         const data: Mission[] = await response.json();
-                        console.log('Données reçues de l\'API:', data);
+                        console.log('✅ Données reçues de l\'API:', data);
 
                         const validatedData = data.map(mission => ({
                             ...mission,
@@ -123,17 +132,24 @@ export const useMissionStore = create<MissionState>()(
 
                         set({ missions: validatedData, error: null });
                     } catch (error) {
-                        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
-                        set({ error: errorMessage });
+                        console.error('❌ Erreur complète de fetchMissions:', error);
+
+                        const errorMessage = error instanceof Error
+                            ? error.message
+                            : 'Une erreur est survenue';
+
+                        set({
+                            missions: [],
+                            error: errorMessage
+                        });
+
+                        // Optionnel : relancer l'erreur pour qu'elle puisse être gérée par le composant
+                        throw error;
                     }
                 },
-
                 updateMissionStatus: async (id: string, status: MissionStatus) => {
                     const currentMissions = get().missions;
                     try {
-                        const token = localStorage.getItem('token');
-                        if (!token) throw new Error('No token found');
-
                         // Mise à jour optimiste
                         set({
                             missions: currentMissions.map(mission =>
@@ -143,8 +159,8 @@ export const useMissionStore = create<MissionState>()(
 
                         const response = await fetch(`/api/mission/${id}`, {
                             method: 'PUT',
+                            credentials: 'include', // Utilisation des cookies
                             headers: {
-                                'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({ status })
@@ -168,9 +184,6 @@ export const useMissionStore = create<MissionState>()(
                 deleteMission: async (id: string) => {
                     const currentMissions = get().missions;
                     try {
-                        const token = localStorage.getItem('token');
-                        if (!token) throw new Error('No token found');
-
                         // Mise à jour optimiste
                         set({
                             missions: currentMissions.filter(mission => mission.id !== id)
@@ -178,32 +191,20 @@ export const useMissionStore = create<MissionState>()(
 
                         const response = await fetch(`/api/mission/${id}`, {
                             method: 'DELETE',
+                            credentials: 'include', // Utilisation des cookies
                             headers: {
-                                'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
                             }
                         });
 
-                        // Log additional details about the response
-                        console.log('Delete Response Status:', response.status);
-                        console.log('Delete Response Headers:', Object.fromEntries(response.headers.entries()));
-
                         if (!response.ok) {
-                            // Get more detailed error information
-                            const errorText = await response.text();
-                            console.error('Delete Mission Error Details:', {
-                                status: response.status,
-                                statusText: response.statusText,
-                                errorText: errorText
-                            });
-
                             // Restaurer l'état précédent en cas d'erreur
                             set({ missions: currentMissions });
+                            const errorText = await response.text();
                             throw new Error(`Failed to delete mission: ${errorText}`);
                         }
 
                     } catch (error) {
-                        // More comprehensive error logging
                         console.error('Full Error in Delete Mission:', {
                             errorMessage: error instanceof Error ? error.message : 'Unknown error',
                             errorStack: error instanceof Error ? error.stack : undefined
@@ -215,12 +216,8 @@ export const useMissionStore = create<MissionState>()(
                     }
                 },
 
-
                 createMission: async (missionData: Partial<Mission>) => {
                     try {
-                        const token = localStorage.getItem('token');
-                        if (!token) throw new Error('No token found');
-
                         // Validate required fields
                         if (!missionData.title) {
                             throw new Error('Mission title is required');
@@ -228,8 +225,8 @@ export const useMissionStore = create<MissionState>()(
 
                         const response = await fetch('/api/mission', {
                             method: 'POST',
+                            credentials: 'include', // Utilisation des cookies
                             headers: {
-                                'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify({

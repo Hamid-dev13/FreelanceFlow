@@ -9,21 +9,24 @@ import "@/styles/theme.css";
 import { Button } from '@/components/common/ui/Button';
 import { GradientText } from '@/components/common/ui/GradientText';
 import { jwtDecode } from "jwt-decode";
+import { useAuthStore } from '@/stores/useAuthStore';
 
 export default function LoginPage() {
     const router = useRouter();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const setAuth = useAuthStore(state => state.setAuth);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError("");
+        console.log('🔵 Début de la tentative de connexion');
 
         try {
+            console.log('📤 Envoi de la requête de connexion');
             const res = await fetch("/api/auth/login", {
                 method: "POST",
                 headers: {
@@ -33,22 +36,23 @@ export default function LoginPage() {
             });
 
             const data = await res.json();
+            console.log('📥 Réponse reçue:', { ok: res.ok });
 
             if (res.ok) {
-                localStorage.setItem("token", data.token);
-                // Toujours rediriger vers /dashboard
+                console.log('✅ Connexion réussie, mise à jour du store');
+                setAuth(data.token); // Utiliser uniquement setAuth du store
                 router.push('/dashboard');
-                // Le layout s'occupera d'afficher la bonne interface selon le rôle
             } else {
+                console.error('❌ Erreur de connexion:', data.error);
                 setError(data.error || "Erreur de connexion");
             }
         } catch (error) {
+            console.error('❌ Erreur serveur:', error);
             setError("Erreur de connexion au serveur");
         } finally {
             setLoading(false);
         }
     };
-
     return (
         <div className="min-h-screen bg-black">
             {/* Header */}

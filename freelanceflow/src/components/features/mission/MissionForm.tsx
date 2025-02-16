@@ -45,15 +45,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit, onProjectS
         const fetchDevelopers = async () => {
             try {
                 setLoading(true);
-                const token = localStorage.getItem('token');
-
-                if (!token) {
-                    throw new Error('Aucun token trouvé');
-                }
-
                 const response = await fetch('/api/users?role=DEVELOPER', {
+                    method: 'GET',
+                    credentials: 'include', // Utilisation des cookies
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
@@ -82,15 +77,10 @@ const MissionForm: React.FC<MissionFormProps> = ({ onClose, onSubmit, onProjectS
         const fetchProjects = async () => {
             try {
                 setProjectsLoading(true);
-                const token = localStorage.getItem('token');
-
-                if (!token) {
-                    throw new Error('Aucun token trouvé');
-                }
-
                 const response = await fetch('/api/projects', {
+                    method: 'GET',
+                    credentials: 'include', // Utilisation des cookies
                     headers: {
-                        'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });

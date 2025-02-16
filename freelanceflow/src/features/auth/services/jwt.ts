@@ -10,10 +10,11 @@ export interface JWTPayload extends jose.JWTPayload {
 // Création de la clé secrète une seule fois
 const JWT_SECRET = new TextEncoder().encode(
     process.env.JWT_SECRET || 'your-secret-key'
-)
+);
 
 export async function verifyJWT(token: string): Promise<JWTPayload> {
     console.log("🔹 Début de la vérification du JWT...");
+    console.log("🔸 Token reçu:", token ? token.substring(0, 20) + "..." : "aucun token");
 
     if (!token) {
         console.error('❌ Token manquant');
@@ -21,10 +22,16 @@ export async function verifyJWT(token: string): Promise<JWTPayload> {
     }
 
     try {
-        console.log("🔹 Tentative de vérification du token...");
-        const { payload } = await jose.jwtVerify(token, JWT_SECRET);
+        // Nettoyer le token si nécessaire
+        const cleanToken = token.startsWith('Bearer ') ? token.split(' ')[1] : token;
+        console.log("🔹 Tentative de vérification du token nettoyé");
 
-        console.log("✅ Token vérifié avec succès. Payload : ", payload);
+        const { payload } = await jose.jwtVerify(cleanToken, JWT_SECRET);
+        console.log("✅ Token vérifié avec succès. Payload:", {
+            userId: payload.userId,
+            email: payload.email,
+            role: payload.role
+        });
 
         // Validation du payload
         if (!payload.userId || !payload.email || !payload.role) {
@@ -34,11 +41,18 @@ export async function verifyJWT(token: string): Promise<JWTPayload> {
 
         // Vérification du type du rôle
         if (payload.role !== 'DEVELOPER' && payload.role !== 'PROJECT_MANAGER') {
-            console.error('❌ Rôle invalide dans le payload');
+            console.error('❌ Rôle invalide dans le payload:', payload.role);
             throw new Error('Rôle invalide dans le payload');
         }
 
-        console.log("✅ Payload valide, retour des informations.");
+        // Vérifier l'expiration
+        const currentTime = Math.floor(Date.now() / 1000);
+        if (payload.exp && payload.exp < currentTime) {
+            console.error('❌ Token expiré');
+            throw new Error('Token expiré');
+        }
+
+        console.log("✅ Validation complète du payload réussie");
         return {
             userId: payload.userId as string,
             email: payload.email as string,
@@ -48,7 +62,12 @@ export async function verifyJWT(token: string): Promise<JWTPayload> {
             ...payload
         };
     } catch (error) {
-        console.error('❌ Erreur de vérification JWT:', error);
+        if (error instanceof Error) {
+            console.error('❌ Erreur de vérification JWT:', error.message);
+            if (error.message.includes('expired')) {
+                throw new Error('Token expiré');
+            }
+        }
         throw new Error('Token invalide ou expiré');
     }
 }
@@ -56,41 +75,36 @@ export async function verifyJWT(token: string): Promise<JWTPayload> {
 export async function signJWT(payload: JWTPayload): Promise<string> {
     console.log("🔹 Début de la création du JWT...");
 
-    // Log du payload avant signature
-    console.log("🔸 Payload à signer : ", payload);
-
-    // Vérification des champs requis avant la signature
-    if (!payload.userId || !payload.email || !payload.role) {
-        console.error('❌ Payload incomplet pour la création du JWT');
-        throw new Error('Payload incomplet pour la création du JWT');
-    }
-
-    // Vérification explicite des types
-    if (typeof payload.userId !== 'string' || typeof payload.email !== 'string' || typeof payload.role !== 'string') {
-        console.error('❌ Les champs userId, email et role doivent être des chaînes de caractères');
-        throw new Error('Les champs userId, email et role doivent être des chaînes de caractères');
-    }
-
     try {
-        console.log("🔹 Tentative de signature du JWT...");
-        const jwt = await new jose.SignJWT({
+        // Validation préalable du payload
+        if (!payload.userId || !payload.email || !payload.role) {
+            console.error('❌ Payload incomplet:', { payload });
+            throw new Error('Payload incomplet pour la création du JWT');
+        }
+
+        // Nettoyer et valider les types
+        const cleanPayload = {
             ...payload,
-            // Assurez-vous que ces champs sont des chaînes
-            userId: String(payload.userId),
-            email: String(payload.email),
+            userId: String(payload.userId).trim(),
+            email: String(payload.email).trim(),
             role: payload.role
-        })
+        };
+
+        console.log("🔸 Payload nettoyé et validé:", cleanPayload);
+
+        const jwt = await new jose.SignJWT(cleanPayload)
             .setProtectedHeader({ alg: 'HS256' })
-            .setIssuedAt() // Ajoute automatiquement iat
+            .setIssuedAt()
             .setExpirationTime('24h')
             .sign(JWT_SECRET);
 
-        console.log("✅ Token généré avec succès.");
+        console.log("✅ Token généré avec succès");
         return jwt;
     } catch (error) {
         console.error('❌ Erreur lors de la signature du JWT:', error);
         if (error instanceof Error) {
-            console.error('Détails de l\'erreur:', error.message);
+            console.error('Détails:', error.message);
+            throw error; // Propager l'erreur originale
         }
         throw new Error('Impossible de créer le token');
     }

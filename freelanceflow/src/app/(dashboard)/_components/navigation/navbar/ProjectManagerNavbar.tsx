@@ -1,6 +1,10 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
-import { LayoutDashboard, FolderKanban, Plus, Layout, ClipboardList, Users } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { LayoutDashboard, FolderKanban, Plus, Layout, ClipboardList, Users, LogOut } from 'lucide-react';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 type ProjectManagerNavbarProps = {
     onNewMission: () => void;
@@ -8,7 +12,15 @@ type ProjectManagerNavbarProps = {
 };
 
 export const ProjectManagerNavbar = ({ onNewMission, isModalOpen }: ProjectManagerNavbarProps) => {
+    const router = useRouter();
+    const { clearAuth } = useAuthStore();
+
     if (isModalOpen) return null;
+
+    const handleLogout = () => {
+        clearAuth();
+        router.push('/login');
+    };
 
     return (
         <header className="sticky top-0 z-10 bg-gray-900/50 backdrop-blur-lg border-b border-gray-800">
@@ -66,6 +78,15 @@ export const ProjectManagerNavbar = ({ onNewMission, isModalOpen }: ProjectManag
                                 >
                                     <Plus className="h-5 w-5" />
                                     <span>Nouvelle missions</span>
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-2 text-gray-300 hover:text-red-500 transition-colors"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                    <span>Déconnexion</span>
                                 </button>
                             </li>
                         </ul>

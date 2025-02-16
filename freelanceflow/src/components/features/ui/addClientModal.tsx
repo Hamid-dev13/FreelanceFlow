@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { X, AlertCircle, Loader2 } from "lucide-react";
 import { parsePhoneNumber, isValidPhoneNumber } from 'libphonenumber-js';
 
@@ -30,16 +30,7 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
         phone?: string;
         server?: string;
     }>({});
-    const [token, setToken] = useState<string | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-
-    useEffect(() => {
-        if (typeof window !== 'undefined') {
-            const storedToken = localStorage.getItem("token");
-            console.log("Token récupéré depuis localStorage:", storedToken);
-            setToken(storedToken);
-        }
-    }, []);
 
     const validateEmail = (email: string) => {
         const re = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
@@ -100,20 +91,14 @@ export default function AddClientModal({ isOpen, onClose }: Props) {
             return;
         }
 
-        if (!token) {
-            setErrors({ server: "Aucun token trouvé" });
-            console.log("Erreur : aucun token trouvé.");
-            return;
-        }
-
         setIsSubmitting(true);
 
         try {
             const res = await fetch("/api/clients", {
                 method: "POST",
+                credentials: 'include', // Important pour envoyer les cookies
                 headers: {
                     "Content-Type": "application/json",
-                    Authorization: `Bearer ${token}`,
                 },
                 body: JSON.stringify({
                     ...formData,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 import { verifyJWT } from '@/features/auth/services/jwt';
+import { cookies } from 'next/headers';
 
 export async function PUT(
     request: NextRequest,
@@ -124,31 +125,53 @@ export async function DELETE(
     request: NextRequest,
     { params }: { params: Promise<{ id: string }> }
 ) {
-    // Wait for the params to resolve
-    const { id } = await params; // Get the id from the resolved params
-
-    const token = request.headers.get('authorization')?.split('Bearer ')[1];
-
-    if (!token) {
-        return NextResponse.json(
-            { message: 'Token d\'authentification requis' },
-            { status: 401 }
-        );
-    }
-
     try {
-        const decoded = await verifyJWT(token);
+        console.log("🔍 Début de la suppression de la mission");
 
+        // Attendre la résolution des paramètres
+        const { id } = await params;
+        console.log("🆔 ID de la mission à supprimer:", id);
+
+        // Récupérer le token d'authentification depuis les cookies
+        const cookieStore = cookies();
+        const tokenCookie = (await cookieStore).get('auth-token');
+
+        const token = tokenCookie ? tokenCookie.value : request.headers.get('authorization')?.split('Bearer ')[1];
+
+        console.log("🍪 Token récupéré:", token ? "présent" : "absent");
+
+        if (!token) {
+            console.log("❌ Pas de token trouvé");
+            return NextResponse.json(
+                { message: 'Token d\'authentification requis' },
+                { status: 401 }
+            );
+        }
+
+        // Vérifier le token
+        const decoded = await verifyJWT(token);
+        console.log("✅ Token vérifié avec succès, payload:", {
+            userId: decoded.userId,
+            role: decoded.role,
+            email: decoded.email
+        });
+
+        // Supprimer la mission
         const deletedMission = await prisma.mission.delete({
             where: { id: id }
         });
 
+        console.log("🗑️ Mission supprimée:", deletedMission);
+
         return NextResponse.json(deletedMission, { status: 200 });
     } catch (error) {
-        console.error('Erreur lors de la suppression de la mission:', error);
+        console.error("❌ Erreur lors de la suppression de la mission:", error);
         return NextResponse.json(
-            { message: 'Erreur lors de la suppression de la mission', error: error instanceof Error ? error.message : String(error) },
+            {
+                message: 'Erreur lors de la suppression de la mission',
+                error: error instanceof Error ? error.message : String(error)
+            },
             { status: 500 }
         );
     }
-};
+}

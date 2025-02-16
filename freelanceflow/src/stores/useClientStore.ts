@@ -1,6 +1,5 @@
 import { create } from 'zustand';
-import { devtools, persist } from 'zustand/middleware';
-import { createJSONStorage, StateStorage } from 'zustand/middleware';
+import { devtools, persist, createJSONStorage, StateStorage } from 'zustand/middleware';
 
 export type Client = {
     id: string;
@@ -15,7 +14,9 @@ interface ClientState {
     clients: Client[];
     loading: 'idle' | 'pending' | 'succeeded' | 'failed';
     error: string | null;
+    searchQuery: string;
     fetchClients: () => Promise<void>;
+    setSearchQuery: (query: string) => void;
     createClient: (clientData: Partial<Client>) => Promise<Client | null>;
     updateClient: (id: string, clientData: Partial<Client>) => Promise<void>;
     deleteClient: (id: string) => Promise<void>;
@@ -25,22 +26,25 @@ const storage: StateStorage = {
     getItem: (name: string): string | null => {
         try {
             const value = localStorage.getItem(name);
-            if (!value) return null;
-            const parsed = JSON.parse(value);
-            return JSON.stringify(parsed);
-        } catch {
+            return value ? JSON.parse(value) : null;
+        } catch (error) {
+            console.error('Erreur lors de la récupération:', error);
             return null;
         }
     },
     setItem: (name: string, value: string): void => {
         try {
-            localStorage.setItem(name, value);
+            localStorage.setItem(name, JSON.stringify(value));
         } catch (error) {
             console.error('Erreur lors de la sauvegarde:', error);
         }
     },
     removeItem: (name: string): void => {
-        localStorage.removeItem(name);
+        try {
+            localStorage.removeItem(name);
+        } catch (error) {
+            console.error('Erreur lors de la suppression:', error);
+        }
     },
 };
 
@@ -51,74 +55,83 @@ export const useClientStore = create<ClientState>()(
                 clients: [],
                 loading: 'idle',
                 error: null,
+                searchQuery: '',
+
+                setSearchQuery: (query) => set({ searchQuery: query }),
 
                 fetchClients: async () => {
+                    console.log('🔵 Début de fetchClients');
+                    console.log('🔵 État actuel:', {
+                        clientsLength: get().clients.length,
+                        loading: get().loading,
+                        error: get().error
+                    });
+
                     set({ loading: 'pending' });
                     try {
-                        const token = localStorage.getItem('token');
-                        if (!token) {
-                            throw new Error('Aucun token trouvé');
-                        }
-
                         const response = await fetch('/api/clients', {
+                            method: 'GET',
+                            credentials: 'include',
                             headers: {
-                                'Authorization': `Bearer ${token}`,
-                                'Content-Type': 'application/json',
+                                'Content-Type': 'application/json'
                             }
                         });
 
+                        console.log('📡 Réponse de la requête:', response.status);
+
                         if (!response.ok) {
-                            throw new Error(`Erreur HTTP: ${response.status}`);
+                            if (response.status === 401) {
+                                throw new Error('Authentification requise');
+                            }
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || `Erreur HTTP: ${response.status}`);
                         }
 
                         const data: Client[] = await response.json();
+                        console.log('✅ Clients récupérés:', data.length);
+
                         set({
                             clients: data,
                             loading: 'succeeded',
                             error: null
                         });
                     } catch (error) {
-                        const errorMessage = error instanceof Error ? error.message : 'Une erreur est survenue';
+                        console.error('❌ Erreur fetchClients:', error);
                         set({
                             loading: 'failed',
-                            error: errorMessage
+                            error: error instanceof Error ? error.message : 'Erreur de récupération des clients'
                         });
                     }
                 },
 
                 createClient: async (clientData) => {
                     try {
-                        const token = localStorage.getItem('token');
-                        if (!token) throw new Error('Aucun token trouvé');
-
                         const response = await fetch('/api/clients', {
                             method: 'POST',
+                            credentials: 'include',
                             headers: {
-                                'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify(clientData)
                         });
 
                         if (!response.ok) {
-                            throw new Error(`Échec de la création du client`);
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Échec de la création du client');
                         }
 
                         const newClient: Client = await response.json();
-                        const currentClients = get().clients;
-
-                        set({
-                            clients: [...currentClients, newClient],
+                        set(state => ({
+                            clients: [...state.clients, newClient],
                             error: null
-                        });
+                        }));
 
                         return newClient;
                     } catch (error) {
-                        const errorMessage = error instanceof Error
-                            ? error.message
-                            : 'Une erreur est survenue lors de la création du client';
-
-                        set({ error: errorMessage });
+                        console.error('❌ Erreur createClient:', error);
+                        set({
+                            error: error instanceof Error ? error.message : 'Erreur lors de la création du client'
+                        });
                         return null;
                     }
                 },
@@ -126,33 +139,32 @@ export const useClientStore = create<ClientState>()(
                 updateClient: async (id, clientData) => {
                     const currentClients = get().clients;
                     try {
-                        const token = localStorage.getItem('token');
-                        if (!token) throw new Error('Aucun token trouvé');
-
+                        // Optimistic update
                         set({
                             clients: currentClients.map(client =>
                                 client.id === id
-                                    ? { ...client, ...clientData }
+                                    ? { ...client, ...clientData, updatedAt: new Date().toISOString() }
                                     : client
                             )
                         });
 
                         const response = await fetch(`/api/clients/${id}`, {
                             method: 'PUT',
+                            credentials: 'include',
                             headers: {
-                                'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
                             },
                             body: JSON.stringify(clientData)
                         });
 
                         if (!response.ok) {
-                            set({ clients: currentClients });
-                            throw new Error(`Échec de la mise à jour`);
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Échec de la mise à jour');
                         }
 
-                        await get().fetchClients();
+                        await get().fetchClients(); // Refetch pour assurer la cohérence
                     } catch (error) {
+                        console.error('❌ Erreur updateClient:', error);
                         set({
                             clients: currentClients,
                             error: error instanceof Error ? error.message : 'Erreur de mise à jour'
@@ -163,26 +175,25 @@ export const useClientStore = create<ClientState>()(
                 deleteClient: async (id) => {
                     const currentClients = get().clients;
                     try {
-                        const token = localStorage.getItem('token');
-                        if (!token) throw new Error('Aucun token trouvé');
-
+                        // Optimistic deletion
                         set({
                             clients: currentClients.filter(client => client.id !== id)
                         });
 
                         const response = await fetch(`/api/clients/${id}`, {
                             method: 'DELETE',
+                            credentials: 'include',
                             headers: {
-                                'Authorization': `Bearer ${token}`,
                                 'Content-Type': 'application/json'
                             }
                         });
 
                         if (!response.ok) {
-                            set({ clients: currentClients });
-                            throw new Error(`Échec de la suppression`);
+                            const errorData = await response.json();
+                            throw new Error(errorData.message || 'Échec de la suppression');
                         }
                     } catch (error) {
+                        console.error('❌ Erreur deleteClient:', error);
                         set({
                             clients: currentClients,
                             error: error instanceof Error ? error.message : 'Erreur de suppression'
@@ -203,3 +214,16 @@ export const useClientStore = create<ClientState>()(
         )
     )
 );
+
+export const useFilteredClients = () => {
+    const { clients, searchQuery } = useClientStore();
+
+    const filteredClients = clients.filter(client =>
+        client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        client.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (client.phone && client.phone.includes(searchQuery))
+    );
+
+    console.log('🔍 Clients filtrés:', filteredClients.length);
+    return filteredClients;
+};

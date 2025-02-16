@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useAuthStore } from '@/stores/useAuthStore';
 
 // Types partagés pour les données
 export interface Project {
@@ -26,43 +27,47 @@ export function useFetchDashboardData<T>(endpoint: string) {
     const [data, setData] = useState<T[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<Error | null>(null);
+    const { role } = useAuthStore(); // Utiliser le store pour l'authentification
 
     useEffect(() => {
         const fetchData = async () => {
-            const token = localStorage.getItem("token");
-            console.log("Token utilisé :", token); // Log du token
-            console.log("Endpoint :", endpoint); // Log de l'endpoint
+            console.log("🔵 Début de la récupération des données", {
+                endpoint,
+                role
+            });
 
             try {
                 const response = await fetch(endpoint, {
+                    credentials: 'include', // Important : inclure les cookies
                     headers: {
-                        Authorization: `Bearer ${token}`,
                         'Content-Type': 'application/json'
                     }
                 });
 
-                console.log("Statut de la réponse :", response.status); // Log du statut de la réponse
+                console.log("📡 Statut de la réponse:", response.status);
 
                 if (!response.ok) {
                     const errorText = await response.text();
-                    console.error("Erreur de réponse :", errorText);
+                    console.error("❌ Erreur de réponse:", errorText);
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }
 
                 const result = await response.json();
-                console.log("Données récupérées :", result); // Log des données
+                console.log("✅ Données récupérées avec succès");
 
                 setData(result);
             } catch (err) {
-                console.error("Erreur de fetch :", err);
+                console.error("❌ Erreur lors de la récupération:", err);
                 setError(err instanceof Error ? err : new Error('Une erreur est survenue'));
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchData();
-    }, [endpoint]);
+        if (role) { // Ne faire l'appel que si on a un rôle
+            fetchData();
+        }
+    }, [endpoint, role]);
 
     return { data, loading, error };
 }

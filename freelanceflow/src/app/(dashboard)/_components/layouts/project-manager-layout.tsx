@@ -1,9 +1,9 @@
-// src/app/(dashboard)/_components/layouts/ProjectManagerLayout.tsx
 "use client";
 
 import React, { useState, type ReactNode } from 'react';
-import { ProjectManagerNavbar } from '@/app/(dashboard)/_components/navigation/navbar/ProjectManagerNavbar';
+
 import MissionForm from '@/components/features/mission/MissionForm';
+import { ProjectManagerNavbar } from '@/app/(dashboard)/_components/navigation/navbar/ProjectManagerNavbar'; // Assurez-vous du bon chemin d'import
 import { useMissionStore, type CreateMissionData } from '@/stores/useMissionStore';
 
 interface ProjectManagerLayoutProps {
@@ -25,6 +25,7 @@ export const ProjectManagerLayout = ({ children }: ProjectManagerLayoutProps) =>
 
     return (
         <div className="relative min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
+            {/* Remplacez la navigation inline par le composant ProjectManagerNavbar */}
             <ProjectManagerNavbar
                 onNewMission={() => setIsModalOpen(true)}
                 isModalOpen={isModalOpen}
@@ -34,6 +35,7 @@ export const ProjectManagerLayout = ({ children }: ProjectManagerLayoutProps) =>
                 {children}
             </main>
 
+            {/* Modale */}
             {isModalOpen && (
                 <MissionForm
                     onClose={() => setIsModalOpen(false)}

@@ -77,10 +77,7 @@ export default function ClientsPage() {
     if (shouldShowLoader) {
         return (
             <div className="relative min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-                <ProjectManagerNavbar
-                    onNewMission={() => setIsModalOpen(true)}
-                    isModalOpen={isModalOpen}
-                />
+
                 <main className="relative z-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="min-h-[400px] bg-gray-900 rounded-xl shadow-lg border border-gray-800 flex items-center justify-center">
                         <div className="flex flex-col items-center gap-4 text-[#FF4405]">
@@ -99,10 +96,7 @@ export default function ClientsPage() {
     if (loading === 'failed' && error) {
         return (
             <div className="relative min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-                <ProjectManagerNavbar
-                    onNewMission={() => setIsModalOpen(true)}
-                    isModalOpen={isModalOpen}
-                />
+
                 <main className="relative z-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                     <div className="flex flex-col items-center justify-center h-96 text-center">
                         <AlertCircle className="h-12 w-12 text-red-500 mb-4" />
@@ -121,10 +115,7 @@ export default function ClientsPage() {
 
     return (
         <div className="relative min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-            <ProjectManagerNavbar
-                onNewMission={() => setIsModalOpen(true)}
-                isModalOpen={isModalOpen}
-            />
+
 
             <main className="relative z-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="bg-gray-900 rounded-xl shadow-lg border border-gray-800">

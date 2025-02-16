@@ -127,10 +127,7 @@ export default function ProjectsPage() {
 
     return (
         <div className="relative min-h-screen bg-gradient-to-b from-black to-gray-900 text-white">
-            <ProjectManagerNavbar
-                onNewMission={() => setIsMissionModalOpen(true)}
-                isModalOpen={isMissionModalOpen}
-            />
+
             <main className="relative z-0 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="bg-gray-900 rounded-xl shadow-lg border border-gray-800">
                     <div className="bg-gray-900 rounded-xl shadow-lg border border-gray-800">

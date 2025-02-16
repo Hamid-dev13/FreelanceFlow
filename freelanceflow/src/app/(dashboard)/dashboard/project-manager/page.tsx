@@ -7,8 +7,8 @@ import ProjectManagerDashboard from '@/app/(dashboard)/dashboard/_components/Pro
 
 export default function Page() {
     return (
-        <ProjectManagerLayout>
-            <ProjectManagerDashboard />
-        </ProjectManagerLayout>
+
+        <ProjectManagerDashboard />
+
     );
 }

@@ -28,42 +28,21 @@ type ParamsType = { id: string };
 
 export async function GET(
     request: NextRequest,
-    context: { params: ParamsType }
+    { params }: { params: Promise<{ id: string }> } // 👈 `params` en tant que Promise
 ) {
-    try {
-        const { id } = context.params;
-        console.log("🔵 Récupération du client:", id);
+    const { id } = await params; // 👈 Attente de la résolution de `params`
 
-        const payload = await verifyAuth();
+    console.log("ID reçu :", id);
 
-        const client = await prisma.client.findUnique({
-            where: {
-                id,
-                userId: payload.userId
-            }
-        });
-
-        if (!client) {
-            console.log("❌ Client non trouvé");
-            return NextResponse.json({ error: "Client non trouvé" }, { status: 404 });
-        }
-
-        return NextResponse.json(client);
-    } catch (error) {
-        console.error("❌ Erreur GET client:", error);
-        return NextResponse.json(
-            { error: error instanceof Error ? error.message : "Erreur serveur" },
-            { status: error instanceof Error && error.message === "Non authentifié" ? 401 : 500 }
-        );
-    }
+    return NextResponse.json({ message: `Client ID: ${id}` });
 }
-
 export async function PUT(
     request: NextRequest,
-    context: { params: ParamsType }
+    { params }: { params: Promise<{ id: string }> } // 👈 Utilisation de Promise comme en GET
 ) {
+    const { id } = await params; // 👈 Extraction avec `await`
+
     try {
-        const { id } = context.params;
         console.log("🔵 Modification du client:", id);
 
         const payload = await verifyAuth();
@@ -91,13 +70,13 @@ export async function PUT(
         );
     }
 }
-
 export async function DELETE(
     request: NextRequest,
-    context: { params: ParamsType }
+    { params }: { params: Promise<{ id: string }> } // 👈 Utilisation de Promise comme en GET et PUT
 ) {
+    const { id } = await params; // 👈 Extraction avec `await`
+
     try {
-        const { id } = context.params;
         console.log("🔵 Suppression du client:", id);
 
         const payload = await verifyAuth();

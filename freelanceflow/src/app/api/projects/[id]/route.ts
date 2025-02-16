@@ -28,15 +28,17 @@ async function verifyAuth() {
 // GET /api/projects/[id] - Détail d'un projet
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> } // Utilisation de Promise comme en GET et PUT
 ) {
+    const { id } = await params; // Extraction avec `await`
+
     try {
-        console.log("🔵 Récupération du projet:", params.id);
+        console.log("🔵 Récupération du projet:", id);
         const payload = await verifyAuth();
 
         const project = await prisma.project.findUnique({
             where: {
-                id: params.id,
+                id,
                 userId: payload.userId
             },
             include: {
@@ -65,21 +67,21 @@ export async function GET(
         );
     }
 }
-
-// PUT /api/projects/[id] - Modifier un projet
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> } // Utilisation de Promise
 ) {
+    const { id } = await params; // Extraction avec `await`
+
     try {
-        console.log("🔵 Modification du projet:", params.id);
+        console.log("🔵 Modification du projet:", id);
         const payload = await verifyAuth();
 
         const { title, description, clientId, startDate, endDate, status } = await request.json();
 
         const project = await prisma.project.update({
             where: {
-                id: params.id,
+                id,
                 userId: payload.userId
             },
             data: {
@@ -115,15 +117,17 @@ export async function PUT(
 // DELETE /api/projects/[id] - Supprimer un projet
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> } // Utilisation de Promise
 ) {
+    const { id } = await params; // Extraction avec `await`
+
     try {
-        console.log("🔵 Suppression du projet:", params.id);
+        console.log("🔵 Suppression du projet:", id);
         const payload = await verifyAuth();
 
         await prisma.project.delete({
             where: {
-                id: params.id,
+                id,
                 userId: payload.userId
             }
         });

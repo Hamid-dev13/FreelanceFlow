@@ -3,13 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { cookies } from "next/headers";
 import { verifyJWT } from '@/features/auth/services/jwt';
 
-const CORS_HEADERS = {
-    "Access-Control-Allow-Origin": "https://freelance-flow-theta.vercel.app/",
-    "Access-Control-Allow-Methods": "GET, PUT, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    "Access-Control-Allow-Credentials": "true"
-};
-
 async function verifyAuth() {
     console.log("🔍 Vérification de l'authentification");
 
@@ -31,12 +24,18 @@ async function verifyAuth() {
     }
 }
 
+interface RouteContext {
+    params: {
+        id: string;
+    };
+}
+
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: RouteContext
 ) {
     try {
-        const clientId = params.id; // Récupérer l'ID immédiatement
+        const clientId = context.params.id;
         console.log("🔵 Récupération du client:", clientId);
 
         const payload = await verifyAuth();
@@ -65,10 +64,10 @@ export async function GET(
 
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: RouteContext
 ) {
     try {
-        const clientId = params.id;
+        const clientId = context.params.id;
         console.log("🔵 Modification du client:", clientId);
 
         const payload = await verifyAuth();
@@ -99,10 +98,10 @@ export async function PUT(
 
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    context: RouteContext
 ) {
     try {
-        const clientId = params.id;
+        const clientId = context.params.id;
         console.log("🔵 Suppression du client:", clientId);
 
         const payload = await verifyAuth();

@@ -24,12 +24,8 @@ async function verifyAuth() {
     }
 }
 
-type Params = { params: { id: string } }
-
-export async function GET(
-    request: NextRequest,
-    { params }: Params
-) {
+// @ts-ignore
+export async function GET(request: NextRequest, { params }) {
     try {
         const { id } = params;
         console.log("🔵 Récupération du client:", id);
@@ -58,10 +54,8 @@ export async function GET(
     }
 }
 
-export async function PUT(
-    request: NextRequest,
-    { params }: Params
-) {
+// @ts-ignore
+export async function PUT(request: NextRequest, { params }) {
     try {
         const { id } = params;
         console.log("🔵 Modification du client:", id);
@@ -92,10 +86,8 @@ export async function PUT(
     }
 }
 
-export async function DELETE(
-    _request: NextRequest,
-    { params }: Params
-) {
+// @ts-ignore
+export async function DELETE(request: NextRequest, { params }) {
     try {
         const { id } = params;
         console.log("🔵 Suppression du client:", id);

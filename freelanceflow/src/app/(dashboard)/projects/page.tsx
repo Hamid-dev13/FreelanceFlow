@@ -16,9 +16,9 @@ import {
 import { ProjectManagerNavbar } from '@/app/(dashboard)/_components/navigation/navbar/ProjectManagerNavbar';
 import MissionForm from '@/components/features/mission/MissionForm';
 import { useMissionStore, type CreateMissionData } from '@/stores/useMissionStore';
-import AddProjectModal from "@/components/features/ui/AddProjectModal";
-import EditProjectModal from "@/components/features/ui/EditProjectModal";
-import DeleteProjectModal from "@/components/features/ui/DeleteProjectModal";
+import AddProjectModal from "@/app/(dashboard)/projects/_components/AddProjectModal";
+import EditProjectModal from "@/app/(dashboard)/projects/_components/EditProjectModal";
+import DeleteProjectModal from "@/app/(dashboard)/projects/_components/DeleteProjectModal";
 
 type Project = {
     id: string;

@@ -8,18 +8,24 @@ datasource db {
   directUrl = env("DIRECT_URL")
 }
 
-// Énumération des rôles
+// Énumérations existantes
 enum Role {
   DEVELOPER
   PROJECT_MANAGER
 }
 
-// Énumération des statuts de mission
 enum MissionStatus {
   PENDING
   IN_PROGRESS
   COMPLETED
   CANCELLED
+}
+
+// Nouvelle énumération pour la difficulté
+enum MissionDifficulty {
+  EASY
+  MEDIUM
+  HARD
 }
 
 model User {
@@ -32,6 +38,12 @@ model User {
   projects  Project[]
   missions  Mission[] @relation("AssignedMissions")
   createdMissions Mission[] @relation("CreatedMissions")
+  
+  // Nouvelles relations pour le système d'évaluation
+  experience DevExperience?
+  evaluationsReceived MissionEvaluation[] @relation("ReceivedEvaluations")
+  evaluationsGiven MissionEvaluation[] @relation("GivenEvaluations")
+  
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -44,13 +56,12 @@ model Client {
   user      User      @relation(fields: [userId], references: [id])
   userId    String
   projects  Project[]
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
 }
 
 model Project {
   id          String    @id @default(uuid())
-  // Supprimez la ligne "name String"
   title       String
   description String?   @db.Text
   startDate   DateTime  @default(now())
@@ -66,25 +77,77 @@ model Project {
 }
 
 model Mission {
-  id          String        @id @default(uuid())
+  id          String           @id @default(uuid())
   title       String
-  description String?       @db.Text
-  status      MissionStatus @default(PENDING)
+  description String?          @db.Text
+  status      MissionStatus    @default(PENDING)
   deadline    DateTime
+  // Nouveau champ
+  difficulty  MissionDifficulty @default(MEDIUM)
   
-  // Relation avec le projet
-  project     Project?      @relation(fields: [projectId], references: [id])
+  project     Project?         @relation(fields: [projectId], references: [id])
   projectId   String?
 
-  // Relation avec le développeur assigné
-  assignedTo  User?          @relation("AssignedMissions", fields: [assignedToId], references: [id])
+  assignedTo  User?           @relation("AssignedMissions", fields: [assignedToId], references: [id])
   assignedToId String?
 
-  // Relation avec le créateur de la mission (chef de projet)
-  createdBy   User          @relation("CreatedMissions", fields: [createdById], references: [id])
+  createdBy   User            @relation("CreatedMissions", fields: [createdById], references: [id])
   createdById String
 
-  // Métadonnées
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  // Nouvelle relation
+  evaluation  MissionEvaluation?
+
+  createdAt   DateTime        @default(now())
+  updatedAt   DateTime        @updatedAt
+}
+
+// Nouveau modèle pour les évaluations
+model MissionEvaluation {
+  id          String    @id @default(uuid())
+  
+  mission     Mission   @relation(fields: [missionId], references: [id])
+  missionId   String    @unique  // Une mission ne peut avoir qu'une évaluation
+  
+  developer   User      @relation("ReceivedEvaluations", fields: [developerId], references: [id])
+  developerId String
+  
+  evaluator   User      @relation("GivenEvaluations", fields: [evaluatorId], references: [id])
+  evaluatorId String
+
+  // Critères d'évaluation
+  codeQuality Int       // 1-5
+  deadline    Int       // 1-5
+  autonomy    Int       // 1-5
+
+  // XP gagnée
+  xpEarned    Int
+
+  // Technologies utilisées
+  technologies String[]
+
+  comment     String?   @db.Text
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+// Nouveau modèle pour l'expérience
+model DevExperience {
+  id          String    @id @default(uuid())
+  
+  user        User      @relation(fields: [userId], references: [id])
+  userId      String    @unique  // Un dev ne peut avoir qu'une expérience
+  
+  totalXp     Int       @default(0)
+  level       Int       @default(1)
+  
+  // JSON pour stocker l'XP par technologie
+  // Format: { "react": { "xp": 100, "level": 2 }, "node": { "xp": 150, "level": 3 } }
+  techExperience Json
+  
+  // Tableau des badges obtenus
+  badges      String[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 }
